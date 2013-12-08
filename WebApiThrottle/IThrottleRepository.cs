@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace WebApiThrottle
 {
+    /// <summary>
+    /// Implement this interface if you want to create a persistent store for the throttle metrics
+    /// </summary>
     public interface IThrottleRepository
     {
         bool Any(string id);

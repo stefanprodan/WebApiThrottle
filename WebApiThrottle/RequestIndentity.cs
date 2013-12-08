@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace WebApiThrottle
 {
+    /// <summary>
+    /// Stores the client ip, key and endpoint
+    /// </summary>
     public class RequestIndentity
     {
         public string ClientIp { get; set; }

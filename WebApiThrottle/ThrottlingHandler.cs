@@ -61,8 +61,7 @@ namespace WebApiThrottle
                         //check limit
                         if (rateLimit > 0 && throttleCounter.TotalRequests > rateLimit)
                         {
-                            var id = identity.ToString() + "-" + rateLimitPeriod;
-                            return QuotaExceededResponse(request, string.Format("API calls quota exceeded! maximum admitted {0} per {1} ID {2}", rateLimit, rateLimitPeriod, id));
+                            return QuotaExceededResponse(request, string.Format("API calls quota exceeded! maximum admitted {0} per {1}", rateLimit, rateLimitPeriod));
                         }
                     }
                 }
