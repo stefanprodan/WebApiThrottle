@@ -33,6 +33,7 @@ public static class WebApiConfig
 ###Endpoint throttling based on IP
 
 If from the same IP, in same second, you'll make two calls to <code>api/values</code> the last call will get blocked.
+But if in the same second you'll call <code>api/values/1</code> too, the request will get throw because it's a different route.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -48,7 +49,8 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###Endpoint throttling based on IP and Client Key
 
-If a client (identified by an unique API key) from the same IP, in same second, makes two calls to <code>api/values</code>, then the last call will get blocked.
+If a client (identified by an unique API key) from the same IP, in same second, makes two calls to <code>api/values</code>, then the last call will get blocked. 
+If you want to apply limits to clients regarding of their IPs then you should set IpThrottling to false.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -65,7 +67,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###IP and/or Client Key White-listing
 
-If requests are initiated from an white-listed IP or Client, then the throttling policy will not be applied and the requests will not be stored. 
+If requests are initiated from an white-listed IP or Client, then the throttling policy will not be applied and the requests will not get stored. 
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -84,7 +86,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###IP and/or Client Key custom rate limits
 
-You can define custom limits for known IPs or Client keys, these limits will override the default ones. Be aware that a custom limit will work only if you have defined a global counterpart.
+You can define custom limits for known IPs or Client Keys, these limits will override the default ones. Be aware that a custom limit will work only if you have defined a global counterpart.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -102,7 +104,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 		ClientRules = new Dictionary<string, RateLimits>
 		{ 
 			{ "api-client-key-1", new RateLimits { PerMinute = 40, PerHour = 400 } },
-			{ "api-client-key-9", new RateLimits { PerDay = 5000 } }
+			{ "api-client-key-9", new RateLimits { PerDay = 2000 } }
 		}
 	},
 	Repository = new CacheRepository()
