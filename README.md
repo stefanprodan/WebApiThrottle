@@ -115,7 +115,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 ###Retrieving API Client Key
 
 By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value, 
-if you API key is stored differently you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify you own retrieval method.
+if you API key is stored differently you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify your own retrieval method.
 
 ``` cs
 public class CustomThrottlingHandler : ThrottlingHandler
@@ -149,4 +149,42 @@ public interface IThrottleRepository
 	
 	void Clear();
 }
+```
+
+###Logging throttled requests
+
+If you want to log throttled requests you'll have to implement IThrottleLogger interface and provide it to the ThrottlingHandler. 
+
+``` cs
+public interface IThrottleLogger
+{
+	void Log(ThrottleLogEntry entry);
+}
+```
+
+Logging implementation example
+``` cs
+public class DebugThrottleLogger : IThrottleLogger
+{
+	public void Log(ThrottleLogEntry entry)
+	{
+		Debug.WriteLine("{0} Request {1} has been blocked, quota {2}/{3} exceeded by {4}",
+		   entry.LogDate, entry.RequestId, entry.RateLimit, entry.RateLimitPeriod, entry.TotalRequests);
+	}
+}
+```
+
+Logging usage example 
+``` cs
+config.MessageHandlers.Add(new ThrottlingHandler()
+{
+	Policy = new ThrottlePolicy(perSecond: 1, perMinute: 30)
+	{
+		IpThrottling = true,
+		ClientThrottling = true,
+		EndpointThrottling = true
+	},
+	Repository = new CacheRepository(),
+	Logger = new DebugThrottleLogger()
+});
 ```
