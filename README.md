@@ -74,6 +74,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 	{
 		IpThrottling = true,
 		IpWhitelist = new List<string> { "::1", "10.0.0.1" },
+		
 		ClientThrottling = true,
 		ClientWhitelist = new List<string> { "admin-key" }
 	},
