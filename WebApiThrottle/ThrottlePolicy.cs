@@ -30,6 +30,7 @@ namespace WebApiThrottle
         /// </summary>
         public bool EndpointThrottling { get; set; }
         public List<string> EndpointWhitelist { get; set; }
+        public Dictionary<string, RateLimits> EndpointRules { get; set; }
 
         internal Dictionary<RateLimitPeriod, long> Rates { get; set; }
 
