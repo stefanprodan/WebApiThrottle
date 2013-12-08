@@ -61,10 +61,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IThrottleLogger.cs" />
     <Compile Include="IThrottleRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RateLimit.cs" />
     <Compile Include="ThrottleCounter.cs" />
+    <Compile Include="ThrottleLogEntry.cs" />
     <Compile Include="ThrottlePolicy.cs" />
     <Compile Include="CacheRepository.cs" />
     <Compile Include="RequestIndentity.cs" />

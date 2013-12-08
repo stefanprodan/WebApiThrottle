@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using WebApiThrottle.Demo.Helpers;
 
 namespace WebApiThrottle.Demo
 {
@@ -50,7 +51,8 @@ namespace WebApiThrottle.Demo
                         { "api/values/", new RateLimits { PerMinute = 15 } }
                     }
                 },
-                Repository = new CacheRepository()
+                Repository = new CacheRepository(),
+                Logger = new CustomThrottleLogger()
             });
         }
     }

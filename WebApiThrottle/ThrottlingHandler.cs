@@ -24,6 +24,11 @@ namespace WebApiThrottle
         public IThrottleRepository Repository { get; set; }
 
         /// <summary>
+        /// Log traffic and blocked requests
+        /// </summary>
+        public IThrottleLogger Logger { get; set; }
+
+        /// <summary>
         /// If none specifed the default will be: 
         /// API calls quota exceeded! maximum admitted {0} per {1}
         /// </summary>
@@ -43,6 +48,7 @@ namespace WebApiThrottle
                 {
                     var rateLimitPeriod = rate.Key;
                     var rateLimit = rate.Value;
+
                     switch (rateLimitPeriod)
                     {
                         case RateLimitPeriod.Second:
@@ -60,7 +66,8 @@ namespace WebApiThrottle
                     }
 
                     //increment counter
-                    var throttleCounter = ProcessRequest(Policy, identity, timeSpan, rateLimitPeriod);
+                    string requestId;
+                    var throttleCounter = ProcessRequest(Policy, identity, timeSpan, rateLimitPeriod, out requestId);
 
                     if (throttleCounter.Timestamp + timeSpan > DateTime.UtcNow)
                     {
@@ -92,6 +99,9 @@ namespace WebApiThrottle
                         //check if limit is reached
                         if (rateLimit > 0 && throttleCounter.TotalRequests > rateLimit)
                         {
+                            //log blocked request
+                            if (Logger != null) Logger.Log(ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit));
+
                             //break execution and return 409 
                             var message = string.IsNullOrEmpty(QuotaExceededMessage) ? 
                                 "API calls quota exceeded! maximum admitted {0} per {1}" : QuotaExceededMessage;
@@ -116,12 +126,12 @@ namespace WebApiThrottle
         }
 
         static readonly object _processLocker = new object();
-        private ThrottleCounter ProcessRequest(ThrottlePolicy throttlePolicy, RequestIndentity throttleEntry, TimeSpan timeSpan, RateLimitPeriod period)
+        private ThrottleCounter ProcessRequest(ThrottlePolicy throttlePolicy, RequestIndentity throttleEntry, TimeSpan timeSpan, RateLimitPeriod period, out string id)
         {
             ThrottleCounter throttleCounter = new ThrottleCounter();
 
             //computed request unique id from IP, client key, url and period
-            var id = "throttle";
+            id = "throttle";
 
             if (throttlePolicy.IpThrottling)
             {
@@ -203,6 +213,22 @@ namespace WebApiThrottle
         private Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message)
         {
             return Task.FromResult(request.CreateResponse(HttpStatusCode.Conflict, message));
+        }
+
+        private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIndentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit)
+        {
+            return new ThrottleLogEntry
+                    {
+                        ClientIp = identity.ClientIp,
+                        ClientKey = identity.ClientKey,
+                        Endpoint = identity.Endpoint,
+                        LogDate = DateTime.UtcNow,
+                        RateLimit = rateLimit,
+                        RateLimitPeriod = rateLimitPeriod,
+                        RequestId = requestId,
+                        StartPeriod = throttleCounter.Timestamp,
+                        TotalRequests = throttleCounter.TotalRequests
+                    };
         }
     }
 
