@@ -2,9 +2,10 @@ WebApiThrottle
 ==============
 
 ASP.NET Web API Throttling handler is designed for controlling the rate of requests that clients 
-can make to an Web API based on IP address, client API key and request route. WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrottle](https://www.nuget.org/packages/WebApiThrottle/).
+can make to an Web API based on IP address, client API key and request route. 
+WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrottle](https://www.nuget.org/packages/WebApiThrottle/).
 
-Web API throttling can be configured using the built-in <code>ThrottlePolicy</code>, you can set multiple limits 
+Web API throttling can be configured using the built-in ThrottlePolicy, you can set multiple limits 
 for different scenarios like allowing an IP or Client to make a maximum number of calls per second, per minute, per hour or even per day.
 You can define these limits to address all requests made to an API or you can scope the limits to each API route.  
 
@@ -109,4 +110,43 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 	},
 	Repository = new CacheRepository()
 });
+```
+
+###Retrieving API Client Key
+
+By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value, 
+if you API key is stored differently you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify you own retrieval method.
+
+``` cs
+public class CustomThrottlingHandler : ThrottlingHandler
+{
+	protected override RequestIndentity SetIndentity(HttpRequestMessage request)
+	{
+		return new RequestIndentity()
+		{
+			ClientKey = request.Headers.GetValues("Authorization-Key").First(),
+			ClientIp = base.GetClientIp(request).ToString(),
+			Endpoint = request.RequestUri.AbsolutePath
+		};
+	}
+}
+```
+###Storing throttle metrics 
+
+WebApiThrottle stores all requests data in memory using ASP.NET Cache, if you want to change the storage to 
+Velocity, MemCache or a NoSQL database all you have to do is create your own repository by implementing the IThrottleRepository interface. 
+
+``` cs
+public interface IThrottleRepository
+{
+	bool Any(string id);
+	
+	ThrottleCounter FirstOrDefault(string id);
+	
+	void Save(string id, ThrottleCounter throttleCounter, TimeSpan expirationTime);
+	
+	void Remove(string id);
+	
+	void Clear();
+}
 ```
