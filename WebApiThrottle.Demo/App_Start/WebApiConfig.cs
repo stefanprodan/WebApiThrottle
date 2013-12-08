@@ -27,7 +27,7 @@ namespace WebApiThrottle.Demo
                     IpRules = new Dictionary<string, RateLimits>
                     { 
                         { "::1", new RateLimits { PerSecond = 2 } },
-                        { "192.168.1.2", new RateLimits { PerMinute = 100, PerHour = 100*60, PerDay = 100*60*24 } }
+                        { "192.168.1.2", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
                     },
                     IpWhitelist = new List<string> { "10.0.0.1" },
                     ClientThrottling = true,
@@ -36,6 +36,7 @@ namespace WebApiThrottle.Demo
                         { "api-client-key-1", new RateLimits { PerMinute = 60, PerHour = 600 } },
                         { "api-client-key-9", new RateLimits { PerDay = 5000 } }
                     },
+                    ClientWhitelist = new List<string> { "admin-key" },
                     EndpointThrottling = true
                 },
                 Repository = new CacheRepository()
