@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <version>1.0.0</version>
+    <authors>Stefan Prodan</authors>
+    <owners>Stefan Prodan</owners>
+    <id>WebApiThrottle</id>
+    <title>ASP.NET Web API throttling handler</title>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ASP.NET Web API Throttling handler is designed for controlling the rate of requests that clients can make to an API based on IP address, client API key and request route.</description>
+    <copyright>Stefan Prodan 2013</copyright>
+    <tags>ASP.NET Web API, throttling, rate limits</tags>
+    <projectUrl>https://github.com/stefanprodan/WebApiThrottle</projectUrl>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="Microsoft.AspNet.WebApi" version="5.0.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\WebApiThrottle\bin\Release\WebApiThrottle.dll" target="lib\net45" />
+    <file src="..\WebApiThrottle\bin\Release\WebApiThrottle.xml" target="lib\net45" />
+    <file src="..\WebApiThrottle\bin\Release\WebApiThrottle.pdb" target="lib\net45" />
+    <file src="..\WebApiThrottle\**\*.cs" target="src" />
+  </files>
+</package>

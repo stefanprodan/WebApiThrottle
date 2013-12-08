@@ -14,6 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{08EB39
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiThrottle", "WebApiThrottle\WebApiThrottle.csproj", "{F049811F-BC05-4CEE-B329-CE3BF2E2E4BE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuspec", ".nuspec", "{2CF93777-474B-4150-B331-4773C7DE6FAE}"
+	ProjectSection(SolutionItems) = preProject
+		.nuspec\WebApiThrottle.nuspec = .nuspec\WebApiThrottle.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
