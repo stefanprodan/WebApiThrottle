@@ -40,11 +40,18 @@ namespace WebApiThrottle
             TimeSpan timeSpan = TimeSpan.FromSeconds(1);
 
             //apply policy
-            //all requests including the rejected ones will stack in this order: day, hour, min, sec
-            //if a client hits the hour limit then the minutes and seconds counters will expire and will eventually get erased from cache
             //the IP rules are applied last and will overwrite any client rule you might defined
             if (Policy.IpThrottling || Policy.ClientThrottling || Policy.EndpointThrottling)
-                foreach (var rate in Policy.Rates)
+            {
+                var rates = Policy.Rates.AsEnumerable();
+                if(Policy.StackBlockedRequests)
+                {
+                    //all requests including the rejected ones will stack in this order: day, hour, min, sec
+                    //if a client hits the hour limit then the minutes and seconds counters will expire and will eventually get erased from cache
+                    rates = Policy.Rates.Reverse();
+                }
+
+                foreach (var rate in rates)
                 {
                     var rateLimitPeriod = rate.Key;
                     var rateLimit = rate.Value;
@@ -103,12 +110,13 @@ namespace WebApiThrottle
                             if (Logger != null) Logger.Log(ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit));
 
                             //break execution and return 409 
-                            var message = string.IsNullOrEmpty(QuotaExceededMessage) ? 
+                            var message = string.IsNullOrEmpty(QuotaExceededMessage) ?
                                 "API calls quota exceeded! maximum admitted {0} per {1}" : QuotaExceededMessage;
                             return QuotaExceededResponse(request, string.Format(message, rateLimit, rateLimitPeriod));
                         }
                     }
                 }
+            }
 
             //no throttling required
             return base.SendAsync(request, cancellationToken);

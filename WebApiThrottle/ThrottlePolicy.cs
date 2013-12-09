@@ -32,6 +32,11 @@ namespace WebApiThrottle
         public List<string> EndpointWhitelist { get; set; }
         public Dictionary<string, RateLimits> EndpointRules { get; set; }
 
+        /// <summary>
+        /// All requests including the rejected ones will stack in this order: day, hour, min, sec
+        /// </summary>
+        public bool StackBlockedRequests { get; set; }
+
         internal Dictionary<RateLimitPeriod, long> Rates { get; set; }
 
         /// <summary>
@@ -40,10 +45,10 @@ namespace WebApiThrottle
         public ThrottlePolicy(long? perSecond, long? perMinute = null, long? perHour = null, long? perDay = null)
         {
             Rates = new Dictionary<RateLimitPeriod, long>();
-            if (perDay.HasValue) Rates.Add(RateLimitPeriod.Day, perDay.Value);
-            if (perHour.HasValue) Rates.Add(RateLimitPeriod.Hour, perHour.Value);
-            if (perMinute.HasValue) Rates.Add(RateLimitPeriod.Minute, perMinute.Value);
             if (perSecond.HasValue) Rates.Add(RateLimitPeriod.Second, perSecond.Value);
+            if (perMinute.HasValue) Rates.Add(RateLimitPeriod.Minute, perMinute.Value);
+            if (perHour.HasValue) Rates.Add(RateLimitPeriod.Hour, perHour.Value);
+            if (perDay.HasValue) Rates.Add(RateLimitPeriod.Day, perDay.Value);
         }
 
     }
