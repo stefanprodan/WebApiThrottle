@@ -5,7 +5,7 @@ ASP.NET Web API Throttling handler is designed for controlling the rate of reque
 can make to an Web API based on IP address, client API key and request route. 
 WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrottle](https://www.nuget.org/packages/WebApiThrottle/).
 
-Web API throttling can be configured using the built-in ThrottlePolicy, you can set multiple limits 
+Web API throttling can be configured using the built-in ThrottlePolicy. You can set multiple limits 
 for different scenarios like allowing an IP or Client to make a maximum number of calls per second, per minute, per hour or even per day.
 You can define these limits to address all requests made to an API or you can scope the limits to each API route.  
 
@@ -33,8 +33,8 @@ public static class WebApiConfig
 
 ###Endpoint throttling based on IP
 
-If from the same IP, in same second, you'll make two calls to <code>api/values</code> the last call will get blocked.
-But if in the same second you'll call <code>api/values/1</code> too, the request will get throw because it's a different route.
+If, from the same IP, in the same second, you'll make two calls to <code>api/values</code>, the last call will get blocked.
+But if in the same second you call <code>api/values/1</code> too, the request will go through because it's a different route.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -50,8 +50,8 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###Endpoint throttling based on IP and Client Key
 
-If a client (identified by an unique API key) from the same IP, in same second, makes two calls to <code>api/values</code>, then the last call will get blocked. 
-If you want to apply limits to clients regarding of their IPs then you should set IpThrottling to false.
+If a client (identified by an unique API key) from the same IP, in the same second, makes two calls to <code>api/values</code>, then the last call will get blocked. 
+If you want to apply limits to clients regardless of their IPs then you should set IpThrottling to false.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -68,7 +68,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###IP and/or Client Key White-listing
 
-If requests are initiated from an white-listed IP or Client, then the throttling policy will not be applied and the requests will not get stored. 
+If requests are initiated from a white-listed IP or Client, then the throttling policy will not be applied and the requests will not get stored. 
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -87,7 +87,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###IP and/or Client Key custom rate limits
 
-You can define custom limits for known IPs or Client Keys, these limits will override the default ones. Be aware that a custom limit will work only if you have defined a global counterpart.
+You can define custom limits for known IPs or Client Keys, these limits will override the default ones. Be aware that a custom limit will only work if you have defined a global counterpart.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -114,9 +114,9 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###Stack rejected requests
 
-By default, rejected calls are not added to the throttle counter. If a client makes 3 requests per second, 
-and you've set one call per second limit, the minute, hour and day counters will record only one call, the one that got throw.
-If you want to record all requests including the rejected ones, you'll have to set <code>StackBlockedRequests</code> to true.
+By default, rejected calls are not added to the throttle counter. If a client makes 3 requests per second 
+and you've set a limit of one call per second, the minute, hour and day counters will only record the first call, the one that wasn't blocked.
+If you want rejected requests to count towards the other limits, you'll have to set <code>StackBlockedRequests</code> to true.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -134,8 +134,8 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###Retrieving API Client Key
 
-By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value, 
-if you API key is stored differently you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify your own retrieval method.
+By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value. 
+If your API key is stored differently, you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify your own retrieval method.
 
 ``` cs
 public class CustomThrottlingHandler : ThrottlingHandler
@@ -153,8 +153,8 @@ public class CustomThrottlingHandler : ThrottlingHandler
 ```
 ###Storing throttle metrics 
 
-WebApiThrottle stores all requests data in memory using ASP.NET Cache, if you want to change the storage to 
-Velocity, MemCache or a NoSQL database all you have to do is create your own repository by implementing the IThrottleRepository interface. 
+WebApiThrottle stores all request data in-memory using ASP.NET Cache. If you want to change the storage to 
+Velocity, MemCache or a NoSQL database, all you have to do is create your own repository by implementing the IThrottleRepository interface. 
 
 ``` cs
 public interface IThrottleRepository
