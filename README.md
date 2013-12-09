@@ -112,6 +112,26 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
+###Stack rejected requests
+
+By default, rejected calls are not added to the throttle counter. If a client makes 3 requests per second, 
+and you've set one call per second limit, the minute, hour and day counters will record only one call, the one that got throw.
+If you want to record all requests including the rejected ones, you'll have to set <code>StackBlockedRequests</code> to true.
+
+``` cs
+config.MessageHandlers.Add(new ThrottlingHandler()
+{
+	Policy = new ThrottlePolicy(perSecond: 1, perMinute: 30)
+	{
+		IpThrottling = true,
+		ClientThrottling = true,
+		EndpointThrottling = true,
+		StackBlockedRequests = true
+	},
+	Repository = new CacheRepository()
+});
+```
+
 ###Retrieving API Client Key
 
 By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value, 
