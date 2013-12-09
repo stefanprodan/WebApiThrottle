@@ -115,7 +115,9 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 You can also define custom limits for certain routes, these limits will override the default ones. 
 You can define endpoint rules by providing relative routes like <code>api/entry/1</code> or just a URL segment like <code>/entry/</code>. 
-The endpoint throttling engine will search for the expression you've provided in the absolute URI, if the expression is contained in the request route then the rule will be applied. 
+The endpoint throttling engine will search for the expression you've provided in the absolute URI, 
+if the expression is contained in the request route then the rule will be applied. 
+If two or more rules match the same URI then the lower limit will be applied.
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
