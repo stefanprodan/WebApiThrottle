@@ -1,8 +1,8 @@
 WebApiThrottle
 ==============
 
-ASP.NET Web API Throttling handler is designed for controlling the rate of requests that clients 
-can make to an Web API based on IP address, client API key and request route. 
+ASP.NET Web API Throttling handler is designed to control the rate of requests that clients 
+can make to a Web API based on IP address, client API key and request route. 
 WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrottle](https://www.nuget.org/packages/WebApiThrottle/).
 
 Web API throttling can be configured using the built-in ThrottlePolicy. You can set multiple limits 
