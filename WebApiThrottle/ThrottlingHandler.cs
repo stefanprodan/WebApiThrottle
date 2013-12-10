@@ -76,7 +76,7 @@ namespace WebApiThrottle
                     string requestId;
                     var throttleCounter = ProcessRequest(Policy, identity, timeSpan, rateLimitPeriod, out requestId);
 
-                    if (throttleCounter.Timestamp + timeSpan > DateTime.UtcNow)
+                    if (throttleCounter.Timestamp + timeSpan >= DateTime.UtcNow)
                     {
                         //apply endpoint rate limits
                         if (Policy.EndpointRules != null)
@@ -141,7 +141,9 @@ namespace WebApiThrottle
         static readonly object _processLocker = new object();
         private ThrottleCounter ProcessRequest(ThrottlePolicy throttlePolicy, RequestIndentity throttleEntry, TimeSpan timeSpan, RateLimitPeriod period, out string id)
         {
-            ThrottleCounter throttleCounter = new ThrottleCounter();
+            var throttleCounter = new ThrottleCounter();
+            throttleCounter.Timestamp = DateTime.UtcNow;
+            throttleCounter.TotalRequests = 1;
 
             //computed request unique id from IP, client key, url and period
             id = "throttle";
@@ -185,24 +187,26 @@ namespace WebApiThrottle
             lock (_processLocker)
             {
                 var entry = Repository.FirstOrDefault(hashId);
-                if (entry != null)
+                if (entry.HasValue)
                 {
                     //entry has not expired
-                    if (entry.Timestamp + timeSpan >= DateTime.UtcNow)
+                    if (entry.Value.Timestamp + timeSpan >= DateTime.UtcNow)
                     {
                         //increment request count
-                        entry.TotalRequests++;
+                        var totalRequests = entry.Value.TotalRequests + 1;
 
                         //deep copy
-                        throttleCounter.Timestamp = entry.Timestamp;
-                        throttleCounter.TotalRequests = entry.TotalRequests;
+                        throttleCounter = new ThrottleCounter
+                        {
+                            Timestamp = entry.Value.Timestamp,
+                            TotalRequests = totalRequests
+                        };
+
                     }
                 }
-                else
-                {
-                    //stores: id (string) - timestamp (datetime) - total (long)
-                    Repository.Save(hashId, new ThrottleCounter(), timeSpan);
-                }
+
+                //stores: id (string) - timestamp (datetime) - total (long)
+                Repository.Save(hashId, throttleCounter, timeSpan);
             }
 
             return throttleCounter;

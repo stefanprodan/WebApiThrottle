@@ -40,9 +40,9 @@ namespace WebApiThrottle
             return HttpContext.Current.Cache[id] != null;
         }
 
-        public ThrottleCounter FirstOrDefault(string id)
+        public ThrottleCounter? FirstOrDefault(string id)
         {
-            return HttpContext.Current.Cache[id] != null ? (ThrottleCounter)HttpContext.Current.Cache[id] : null;
+            return (ThrottleCounter?)HttpContext.Current.Cache[id];
         }
 
         public void Remove(string id)
