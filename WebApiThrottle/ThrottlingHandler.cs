@@ -81,11 +81,16 @@ namespace WebApiThrottle
                         //apply endpoint rate limits
                         if (Policy.EndpointRules != null)
                         {
-                            var rule = Policy.EndpointRules.Keys.FirstOrDefault(x => identity.Endpoint.Contains(x));
-                            if (!string.IsNullOrEmpty(rule))
+                            var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key)).ToList();
+                            if (rules.Any())
                             {
-                                var limit = Policy.EndpointRules[rule].GetLimit(rateLimitPeriod);
-                                if (limit > 0) rateLimit = limit;
+                                //get the lower limit from all appling rules
+                                var customRate = (from r in rules let rateValue = r.Value.GetLimit(rateLimitPeriod) select rateValue).Min();
+
+                                if (customRate > 0)
+                                {
+                                    rateLimit = customRate;
+                                }
                             }
                         }
 
@@ -182,17 +187,22 @@ namespace WebApiThrottle
                 var entry = Repository.FirstOrDefault(hashId);
                 if (entry != null)
                 {
-                    throttleCounter = entry;
-                    throttleCounter.TotalRequests++;
-
-                    if (entry.Timestamp + timeSpan < DateTime.UtcNow)
+                    //entry has not expired
+                    if (entry.Timestamp + timeSpan >= DateTime.UtcNow)
                     {
-                        throttleCounter = new ThrottleCounter();
+                        //increment request count
+                        entry.TotalRequests++;
+
+                        //deep copy
+                        throttleCounter.Timestamp = entry.Timestamp;
+                        throttleCounter.TotalRequests = entry.TotalRequests;
                     }
                 }
-
-                //stores: id (string) - timestamp (datetime) - total (long)
-                Repository.Save(hashId, throttleCounter, timeSpan);
+                else
+                {
+                    //stores: id (string) - timestamp (datetime) - total (long)
+                    Repository.Save(hashId, new ThrottleCounter(), timeSpan);
+                }
             }
 
             return throttleCounter;

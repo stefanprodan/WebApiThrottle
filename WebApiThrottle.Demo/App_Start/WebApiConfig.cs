@@ -48,7 +48,8 @@ namespace WebApiThrottle.Demo
                     EndpointThrottling = true,
                     EndpointRules = new Dictionary<string, RateLimits>
                     { 
-                        { "api/values/", new RateLimits { PerMinute = 15 } }
+                        { "api/values/", new RateLimits { PerSecond = 3 } },
+                        { "api/values", new RateLimits { PerMinute = 4 } }
                     }
                 },
                 Repository = new CacheRepository(),
