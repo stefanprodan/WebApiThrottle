@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web.Http;
 
 namespace WebApiThrottle.Demo.Controllers
 {
