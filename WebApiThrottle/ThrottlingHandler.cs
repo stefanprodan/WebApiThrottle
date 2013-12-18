@@ -112,7 +112,7 @@ namespace WebApiThrottle
                         if (rateLimit > 0 && throttleCounter.TotalRequests > rateLimit)
                         {
                             //log blocked request
-                            if (Logger != null) Logger.Log(ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit));
+                            if (Logger != null) Logger.Log(ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, request));
 
                             //break execution and return 409 
                             var message = string.IsNullOrEmpty(QuotaExceededMessage) ?
@@ -237,7 +237,7 @@ namespace WebApiThrottle
             return Task.FromResult(request.CreateResponse(HttpStatusCode.Conflict, message));
         }
 
-        private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIndentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit)
+        private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIndentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
         {
             return new ThrottleLogEntry
                     {
@@ -249,7 +249,8 @@ namespace WebApiThrottle
                         RateLimitPeriod = rateLimitPeriod,
                         RequestId = requestId,
                         StartPeriod = throttleCounter.Timestamp,
-                        TotalRequests = throttleCounter.TotalRequests
+                        TotalRequests = throttleCounter.TotalRequests,
+                        Request = request
                     };
         }
     }

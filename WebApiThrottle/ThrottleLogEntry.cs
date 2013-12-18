@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,5 +18,6 @@ namespace WebApiThrottle
         public long RateLimit { get; set; }
         public string RateLimitPeriod { get; set; }
         public DateTime LogDate { get; set; }
+        public HttpRequestMessage Request { get; set; }
     }
 }
