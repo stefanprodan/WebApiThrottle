@@ -71,6 +71,7 @@
     <Compile Include="CacheRepository.cs" />
     <Compile Include="RequestIndentity.cs" />
     <Compile Include="ThrottlingHandler.cs" />
+    <Compile Include="TracingThrottleLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
