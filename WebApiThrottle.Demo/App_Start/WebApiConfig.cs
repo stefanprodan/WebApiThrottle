@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Tracing;
 using WebApiThrottle.Demo.Helpers;
 
 namespace WebApiThrottle.Demo
@@ -18,6 +19,14 @@ namespace WebApiThrottle.Demo
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            //trace provider
+            var traceWriter = new SystemDiagnosticsTraceWriter()
+            {
+                IsVerbose = true
+            };
+            config.Services.Replace(typeof(ITraceWriter), traceWriter);
+            config.EnableSystemDiagnosticsTracing();
 
             //Web API throttling
             config.MessageHandlers.Add(new ThrottlingHandler()
@@ -53,7 +62,7 @@ namespace WebApiThrottle.Demo
                     }
                 },
                 Repository = new CacheRepository(),
-                Logger = new CustomThrottleLogger()
+                Logger = new TracingThrottleLogger(traceWriter)
             });
         }
     }
