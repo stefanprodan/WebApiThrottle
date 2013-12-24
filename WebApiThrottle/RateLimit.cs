@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebApiThrottle
 {
+    [Serializable]
     public class RateLimits
     {
         public long PerSecond { get; set; }

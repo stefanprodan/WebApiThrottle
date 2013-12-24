@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace WebApiThrottle
 {
+    [Serializable]
     public class ThrottleLogEntry
     {
         public string RequestId { get; set; }

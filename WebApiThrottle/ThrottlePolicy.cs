@@ -9,6 +9,7 @@ namespace WebApiThrottle
     /// <summary>
     /// Rate limits policy
     /// </summary>
+    [Serializable]
     public class ThrottlePolicy
     {
         /// <summary>

@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IPAddressRange.cs" />
     <Compile Include="IThrottleLogger.cs" />
     <Compile Include="IThrottleRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

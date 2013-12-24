@@ -102,9 +102,10 @@ namespace WebApiThrottle
                         }
 
                         //enforce ip rate limit as is most specific 
-                        if (Policy.IpRules != null && Policy.IpRules.Keys.Contains(identity.ClientIp))
+                        string ipRule = null;
+                        if (Policy.IpRules != null && ContainsIp(Policy.IpRules.Keys.ToList(), identity.ClientIp, out ipRule))
                         {
-                            var limit = Policy.IpRules[identity.ClientIp].GetLimit(rateLimitPeriod);
+                            var limit = Policy.IpRules[ipRule].GetLimit(rateLimitPeriod);
                             if (limit > 0) rateLimit = limit;
                         }
 
@@ -150,7 +151,7 @@ namespace WebApiThrottle
 
             if (throttlePolicy.IpThrottling)
             {
-                if (throttlePolicy.IpWhitelist != null && throttlePolicy.IpWhitelist.Contains(throttleEntry.ClientIp))
+                if (throttlePolicy.IpWhitelist != null && ContainsIp(throttlePolicy.IpWhitelist, throttleEntry.ClientIp))
                 {
                     return throttleCounter;
                 }
@@ -230,6 +231,43 @@ namespace WebApiThrottle
             }
 
             return null;
+        }
+
+        private bool ContainsIp(List<string> ipRules, string clientIp)
+        {
+            var ip = IPAddress.Parse(clientIp);
+            if (ipRules != null && ipRules.Any())
+            {
+                foreach (var rule in ipRules)
+                {
+                    var range = new IPAddressRange(rule);
+                    if (range.Contains(ip)) return true;
+                }
+
+            }
+
+            return false;
+        }
+
+        private bool ContainsIp(List<string> ipRules, string clientIp, out string rule)
+        {
+            rule = null;
+            var ip = IPAddress.Parse(clientIp);
+            if (ipRules != null && ipRules.Any())
+            {
+                foreach (var r in ipRules)
+                {
+                    var range = new IPAddressRange(r);
+                    if (range.Contains(ip))
+                    {
+                        rule = r;
+                        return true;
+                    }
+                }
+
+            }
+
+            return false;
         }
 
         private Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message)

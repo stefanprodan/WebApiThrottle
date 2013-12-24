@@ -37,11 +37,11 @@ namespace WebApiThrottle.Demo
                     IpThrottling = true,
                     IpRules = new Dictionary<string, RateLimits>
                     { 
-                        { "::1", new RateLimits { PerSecond = 2 } },
-                        { "192.168.0.1", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
+                        { "::1/10", new RateLimits { PerSecond = 2 } },
+                        { "192.168.2.1", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
                     },
                     //white list the "::1" IP to disable throttling on localhost for Win8
-                    IpWhitelist = new List<string> { "127.0.0.1" },
+                    IpWhitelist = new List<string> { "127.0.0.1", "192.168.0.0/24" },
 
                     //scope to clients (if IP throttling is applied then the scope becomes a combination of IP and client key)
                     ClientThrottling = true,
