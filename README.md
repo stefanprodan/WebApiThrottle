@@ -68,7 +68,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ###IP and/or Client Key White-listing
 
-If requests are initiated from a white-listed IP or Client, then the throttling policy will not be applied and the requests will not get stored. 
+If requests are initiated from a white-listed IP or Client, then the throttling policy will not be applied and the requests will not get stored. The IP white-list supports IP v4 and v6 ranges like "192.168.0.0/24", "fe80::/10" and "192.168.0.0-192.168.0.255" for more information check [jsakamoto/ipaddressrange](https://github.com/jsakamoto/ipaddressrange).
 
 ``` cs
 config.MessageHandlers.Add(new ThrottlingHandler()
@@ -76,7 +76,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 	Policy = new ThrottlePolicy(perSecond: 2, perMinute: 60)
 	{
 		IpThrottling = true,
-		IpWhitelist = new List<string> { "::1", "10.0.0.1" },
+		IpWhitelist = new List<string> { "::1", "192.168.0.0/24" },
 		
 		ClientThrottling = true,
 		ClientWhitelist = new List<string> { "admin-key" }
@@ -97,8 +97,8 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 		IpThrottling = true,
 		IpRules = new Dictionary<string, RateLimits>
 		{ 
-			{ "192.168.0.1", new RateLimits { PerSecond = 2 } },
-			{ "192.168.1.2", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
+			{ "192.168.1.1", new RateLimits { PerSecond = 2 } },
+			{ "192.168.2.0/24", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
 		},
 		
 		ClientThrottling = true,
