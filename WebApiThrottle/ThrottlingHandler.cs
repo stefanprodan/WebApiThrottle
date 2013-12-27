@@ -14,6 +14,16 @@ namespace WebApiThrottle
     public class ThrottlingHandler : DelegatingHandler
     {
         /// <summary>
+        /// Creates a new instance of the <see cref="ThrottlingHandler"/> class.
+        /// By default, the <see cref="QuotaExceededResponseCode"/> property 
+        /// is set to 409 (Conflict).
+        /// </summary>
+        public ThrottlingHandler()
+        {
+            QuotaExceededResponseCode = HttpStatusCode.Conflict;
+        }
+
+        /// <summary>
         /// Throttling rate limits policy
         /// </summary>
         public ThrottlePolicy Policy { get; set; }
@@ -33,6 +43,13 @@ namespace WebApiThrottle
         /// API calls quota exceeded! maximum admitted {0} per {1}
         /// </summary>
         public string QuotaExceededMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the value to return as the HTTP status 
+        /// code when a request is rejected because of the
+        /// throttling policy.  The default value is 409 (Conflict)
+        /// </summary>
+        public HttpStatusCode QuotaExceededResponseCode { get; set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -84,7 +101,7 @@ namespace WebApiThrottle
                             var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key)).ToList();
                             if (rules.Any())
                             {
-                                //get the lower limit from all appling rules
+                                //get the lower limit from all applying rules
                                 var customRate = (from r in rules let rateValue = r.Value.GetLimit(rateLimitPeriod) select rateValue).Min();
 
                                 if (customRate > 0)
@@ -118,7 +135,7 @@ namespace WebApiThrottle
                             //break execution and return 409 
                             var message = string.IsNullOrEmpty(QuotaExceededMessage) ?
                                 "API calls quota exceeded! maximum admitted {0} per {1}" : QuotaExceededMessage;
-                            return QuotaExceededResponse(request, string.Format(message, rateLimit, rateLimitPeriod));
+                            return QuotaExceededResponse(request, string.Format(message, rateLimit, rateLimitPeriod), QuotaExceededResponseCode);
                         }
                     }
                 }
@@ -270,9 +287,9 @@ namespace WebApiThrottle
             return false;
         }
 
-        private Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message)
+        private Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode)
         {
-            return Task.FromResult(request.CreateResponse(HttpStatusCode.Conflict, message));
+            return Task.FromResult(request.CreateResponse(responseCode, message));
         }
 
         private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIndentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
