@@ -145,9 +145,9 @@ namespace WebApiThrottle
             return base.SendAsync(request, cancellationToken);
         }
 
-        protected virtual RequestIndentity SetIndentity(HttpRequestMessage request)
+        protected virtual RequestIdentity SetIndentity(HttpRequestMessage request)
         {
-            var entry = new RequestIndentity();
+            var entry = new RequestIdentity();
             entry.ClientIp = GetClientIp(request).ToString();
             entry.Endpoint = request.RequestUri.AbsolutePath;
 
@@ -157,7 +157,7 @@ namespace WebApiThrottle
         }
 
         static readonly object _processLocker = new object();
-        private ThrottleCounter ProcessRequest(ThrottlePolicy throttlePolicy, RequestIndentity throttleEntry, TimeSpan timeSpan, RateLimitPeriod period, out string id)
+        private ThrottleCounter ProcessRequest(ThrottlePolicy throttlePolicy, RequestIdentity throttleEntry, TimeSpan timeSpan, RateLimitPeriod period, out string id)
         {
             var throttleCounter = new ThrottleCounter();
             throttleCounter.Timestamp = DateTime.UtcNow;
@@ -292,7 +292,7 @@ namespace WebApiThrottle
             return Task.FromResult(request.CreateResponse(responseCode, message));
         }
 
-        private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIndentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
+        private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIdentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
         {
             return new ThrottleLogEntry
                     {

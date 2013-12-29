@@ -10,7 +10,7 @@ namespace WebApiThrottle
     /// Stores the client ip, key and endpoint
     /// </summary>
     [Serializable]
-    public class RequestIndentity
+    public class RequestIdentity
     {
         public string ClientIp { get; set; }
         public string ClientKey { get; set; }
