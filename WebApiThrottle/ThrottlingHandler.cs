@@ -61,7 +61,7 @@ namespace WebApiThrottle
             if (Policy.IpThrottling || Policy.ClientThrottling || Policy.EndpointThrottling)
             {
                 var rates = Policy.Rates.AsEnumerable();
-                if(Policy.StackBlockedRequests)
+                if (Policy.StackBlockedRequests)
                 {
                     //all requests including the rejected ones will stack in this order: day, hour, min, sec
                     //if a client hits the hour limit then the minutes and seconds counters will expire and will eventually get erased from cache
@@ -162,9 +162,7 @@ namespace WebApiThrottle
             var throttleCounter = new ThrottleCounter();
             throttleCounter.Timestamp = DateTime.UtcNow;
             throttleCounter.TotalRequests = 1;
-
-            //computed request unique id from IP, client key, url and period
-            id = "throttle";
+            id = ComputeStoreKey(throttlePolicy, throttleEntry, period);
 
             if (throttlePolicy.IpThrottling)
             {
@@ -172,8 +170,6 @@ namespace WebApiThrottle
                 {
                     return throttleCounter;
                 }
-
-                id += "_" + throttleEntry.ClientIp;
             }
 
             if (throttlePolicy.ClientThrottling)
@@ -182,8 +178,6 @@ namespace WebApiThrottle
                 {
                     return throttleCounter;
                 }
-
-                id += "_" + throttleEntry.ClientKey;
             }
 
             if (throttlePolicy.EndpointThrottling)
@@ -192,11 +186,7 @@ namespace WebApiThrottle
                 {
                     return throttleCounter;
                 }
-
-                id += "_" + throttleEntry.Endpoint;
             }
-
-            id += "_" + period;
 
             //get the hash value of the computed id
             var hashId = ComputeHash(id);
@@ -233,6 +223,28 @@ namespace WebApiThrottle
         protected virtual string ComputeHash(string s)
         {
             return BitConverter.ToString(new System.Security.Cryptography.SHA1Managed().ComputeHash(System.Text.Encoding.UTF8.GetBytes(s))).Replace("-", "");
+        }
+
+        protected virtual string ComputeStoreKey(ThrottlePolicy throttlePolicy, RequestIdentity requestIdentity, RateLimitPeriod period)
+        {
+            var keyValues = new List<string>()
+                {
+                    "throttle"
+                };
+
+            if (throttlePolicy.IpThrottling)
+                keyValues.Add(requestIdentity.ClientIp);
+
+            if (throttlePolicy.ClientThrottling)
+                keyValues.Add(requestIdentity.ClientKey);
+
+            if (throttlePolicy.EndpointThrottling)
+                keyValues.Add(requestIdentity.Endpoint);
+
+            keyValues.Add(period.ToString());
+
+            var id = string.Join("_", keyValues);
+            return id;
         }
 
         protected IPAddress GetClientIp(HttpRequestMessage request)
