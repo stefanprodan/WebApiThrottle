@@ -59,7 +59,7 @@ namespace WebApiThrottle
                 return base.SendAsync(request, cancellationToken);
 
             var identity = SetIndentity(request);
-            if (IsWhitelisted(Policy, identity))
+            if (IsWhitelisted(identity))
                 return base.SendAsync(request, cancellationToken);
 
             TimeSpan timeSpan = TimeSpan.FromSeconds(1);
@@ -95,7 +95,7 @@ namespace WebApiThrottle
 
                 //increment counter
                 string requestId;
-                var throttleCounter = ProcessRequest(Policy, identity, timeSpan, rateLimitPeriod, out requestId);
+                var throttleCounter = ProcessRequest(identity, timeSpan, rateLimitPeriod, out requestId);
 
                 if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
                     continue;
@@ -163,7 +163,7 @@ namespace WebApiThrottle
         }
 
         static readonly object _processLocker = new object();
-        private ThrottleCounter ProcessRequest(ThrottlePolicy throttlePolicy, RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, out string id)
+        private ThrottleCounter ProcessRequest(RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, out string id)
         {
             var throttleCounter = new ThrottleCounter()
                 {
@@ -171,7 +171,7 @@ namespace WebApiThrottle
                     TotalRequests = 1
                 };
 
-            id = ComputeStoreKey(throttlePolicy, requestIdentity, period);
+            id = ComputeStoreKey(requestIdentity, period);
 
             //get the hash value of the computed id
             var hashId = ComputeHash(id);
@@ -210,20 +210,20 @@ namespace WebApiThrottle
             return BitConverter.ToString(new System.Security.Cryptography.SHA1Managed().ComputeHash(System.Text.Encoding.UTF8.GetBytes(s))).Replace("-", "");
         }
 
-        protected virtual string ComputeStoreKey(ThrottlePolicy throttlePolicy, RequestIdentity requestIdentity, RateLimitPeriod period)
+        protected virtual string ComputeStoreKey(RequestIdentity requestIdentity, RateLimitPeriod period)
         {
             var keyValues = new List<string>()
                 {
                     "throttle"
                 };
 
-            if (throttlePolicy.IpThrottling)
+            if (Policy.IpThrottling)
                 keyValues.Add(requestIdentity.ClientIp);
 
-            if (throttlePolicy.ClientThrottling)
+            if (Policy.ClientThrottling)
                 keyValues.Add(requestIdentity.ClientKey);
 
-            if (throttlePolicy.EndpointThrottling)
+            if (Policy.EndpointThrottling)
                 keyValues.Add(requestIdentity.Endpoint);
 
             keyValues.Add(period.ToString());
@@ -247,18 +247,18 @@ namespace WebApiThrottle
             return null;
         }
 
-        private bool IsWhitelisted(ThrottlePolicy throttlePolicy, RequestIdentity requestIdentity)
+        private bool IsWhitelisted(RequestIdentity requestIdentity)
         {
-            if (throttlePolicy.IpThrottling)
-                if (throttlePolicy.IpWhitelist != null && ContainsIp(throttlePolicy.IpWhitelist, requestIdentity.ClientIp))
+            if (Policy.IpThrottling)
+                if (Policy.IpWhitelist != null && ContainsIp(Policy.IpWhitelist, requestIdentity.ClientIp))
                     return true;
 
-            if (throttlePolicy.ClientThrottling)
-                if (throttlePolicy.ClientWhitelist != null && throttlePolicy.ClientWhitelist.Contains(requestIdentity.ClientKey))
+            if (Policy.ClientThrottling)
+                if (Policy.ClientWhitelist != null && Policy.ClientWhitelist.Contains(requestIdentity.ClientKey))
                     return true;
 
-            if (throttlePolicy.EndpointThrottling)
-                if (throttlePolicy.EndpointWhitelist != null && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x)))
+            if (Policy.EndpointThrottling)
+                if (Policy.EndpointWhitelist != null && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x)))
                     return true;
 
             return false;
