@@ -53,9 +53,7 @@ namespace WebApiThrottle
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            //apply policy
-            //the IP rules are applied last and will overwrite any client rule you might defined
-            if (!Policy.IpThrottling && !Policy.ClientThrottling && Policy.EndpointThrottling)
+            if (!Policy.IpThrottling && !Policy.ClientThrottling && !Policy.EndpointThrottling)
                 return base.SendAsync(request, cancellationToken);
 
             var identity = SetIndentity(request);
@@ -72,6 +70,8 @@ namespace WebApiThrottle
                 rates = Policy.Rates.Reverse();
             }
 
+            //apply policy
+            //the IP rules are applied last and will overwrite any client rule you might defined
             foreach (var rate in rates)
             {
                 var rateLimitPeriod = rate.Key;
