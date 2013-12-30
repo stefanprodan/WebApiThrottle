@@ -171,15 +171,12 @@ namespace WebApiThrottle
                     TotalRequests = 1
                 };
 
-            id = ComputeStoreKey(requestIdentity, period);
-
-            //get the hash value of the computed id
-            var hashId = ComputeHash(id);
+            id = ComputeThrottleKey(requestIdentity, period);
 
             //serial reads and writes
             lock (_processLocker)
             {
-                var entry = Repository.FirstOrDefault(hashId);
+                var entry = Repository.FirstOrDefault(id);
                 if (entry.HasValue)
                 {
                     //entry has not expired
@@ -199,18 +196,13 @@ namespace WebApiThrottle
                 }
 
                 //stores: id (string) - timestamp (datetime) - total (long)
-                Repository.Save(hashId, throttleCounter, timeSpan);
+                Repository.Save(id, throttleCounter, timeSpan);
             }
 
             return throttleCounter;
         }
 
-        protected virtual string ComputeHash(string s)
-        {
-            return BitConverter.ToString(new System.Security.Cryptography.SHA1Managed().ComputeHash(System.Text.Encoding.UTF8.GetBytes(s))).Replace("-", "");
-        }
-
-        protected virtual string ComputeStoreKey(RequestIdentity requestIdentity, RateLimitPeriod period)
+        protected virtual string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)
         {
             var keyValues = new List<string>()
                 {
@@ -229,7 +221,10 @@ namespace WebApiThrottle
             keyValues.Add(period.ToString());
 
             var id = string.Join("_", keyValues);
-            return id;
+            var idBytes = Encoding.UTF8.GetBytes(id);
+            var hashBytes = new System.Security.Cryptography.SHA1Managed().ComputeHash(idBytes);
+            var hex = BitConverter.ToString(hashBytes).Replace("-", "");
+            return hex;
         }
 
         protected IPAddress GetClientIp(HttpRequestMessage request)
@@ -274,7 +269,6 @@ namespace WebApiThrottle
                     var range = new IPAddressRange(rule);
                     if (range.Contains(ip)) return true;
                 }
-
             }
 
             return false;
