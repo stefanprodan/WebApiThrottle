@@ -70,7 +70,7 @@
     <Compile Include="ThrottleLogEntry.cs" />
     <Compile Include="ThrottlePolicy.cs" />
     <Compile Include="CacheRepository.cs" />
-    <Compile Include="RequestIndentity.cs" />
+    <Compile Include="RequestIdentity.cs" />
     <Compile Include="ThrottlingHandler.cs" />
     <Compile Include="TracingThrottleLogger.cs" />
   </ItemGroup>
