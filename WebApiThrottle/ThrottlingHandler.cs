@@ -91,6 +91,9 @@ namespace WebApiThrottle
                     case RateLimitPeriod.Day:
                         timeSpan = TimeSpan.FromDays(1);
                         break;
+                    case RateLimitPeriod.Week:
+                        timeSpan = TimeSpan.FromDays(7);
+                        break;
                 }
 
                 //increment counter

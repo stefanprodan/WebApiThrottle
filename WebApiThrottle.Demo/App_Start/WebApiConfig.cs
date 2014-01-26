@@ -31,7 +31,7 @@ namespace WebApiThrottle.Demo
             //Web API throttling
             config.MessageHandlers.Add(new ThrottlingHandler()
             {
-                Policy = new ThrottlePolicy(perSecond: 1, perMinute: 20, perHour: 30, perDay: 35)
+                Policy = new ThrottlePolicy(perSecond: 1, perMinute: 20, perHour: 30, perDay: 35, perWeek: 3000)
                 {
                     //scope to IPs
                     IpThrottling = true,
