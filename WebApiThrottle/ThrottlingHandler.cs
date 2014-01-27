@@ -106,7 +106,7 @@ namespace WebApiThrottle
                 //apply endpoint rate limits
                 if (Policy.EndpointRules != null)
                 {
-                    var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key)).ToList();
+                    var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key.ToLowerInvariant())).ToList();
                     if (rules.Any())
                     {
                         //get the lower limit from all applying rules
@@ -159,7 +159,7 @@ namespace WebApiThrottle
         {
             var entry = new RequestIdentity();
             entry.ClientIp = GetClientIp(request).ToString();
-            entry.Endpoint = request.RequestUri.AbsolutePath;
+            entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
             entry.ClientKey = request.Headers.Contains("Authorization-Token") ? request.Headers.GetValues("Authorization-Token").First() : "anon";
 
             return entry;
@@ -256,7 +256,7 @@ namespace WebApiThrottle
                     return true;
 
             if (Policy.EndpointThrottling)
-                if (Policy.EndpointWhitelist != null && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x)))
+                if (Policy.EndpointWhitelist != null && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x.ToLowerInvariant())))
                     return true;
 
             return false;
