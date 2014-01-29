@@ -1,51 +1,67 @@
 @using System.Web.Http
+@using System.Web.Http.Description
 @using WebApiThrottle.Demo.Areas.HelpPage.Models
+@using WebApiThrottle.Demo.Areas.HelpPage.ModelDescriptions
 @model HelpPageApiModel
 
-@{ 
-    var description = Model.ApiDescription;
-    bool hasParameters = description.ParameterDescriptions.Count > 0;
-    bool hasRequestSamples = Model.SampleRequests.Count > 0;
-    bool hasResponseSamples = Model.SampleResponses.Count > 0;
+@{
+    ApiDescription description = Model.ApiDescription;
 }
 <h1>@description.HttpMethod.Method @description.RelativePath</h1>
 <div>
-    @if (description.Documentation != null)
+    <p>@description.Documentation</p>
+
+    <h2>Request Information</h2>
+
+    <h3>URI Parameters</h3>
+    @Html.DisplayFor(m => m.UriParameters, "Parameters")
+
+    <h3>Body Parameters</h3>
+
+    <p>@Model.RequestDocumentation</p>
+
+    @if (Model.RequestModelDescription != null)
     {
-        <p>@description.Documentation</p>
+        @Html.DisplayFor(m => m.RequestModelDescription.ModelType, "ModelDescriptionLink", new { modelDescription = Model.RequestModelDescription })
+        if (Model.RequestBodyParameters != null)
+        {
+            @Html.DisplayFor(m => m.RequestBodyParameters, "Parameters")
+        }
     }
     else
     {
-        <p>No documentation available.</p>
+        <p>None.</p>
     }
 
-    @if (hasParameters || hasRequestSamples)
+    @if (Model.SampleRequests.Count > 0)
     {
-        <h2>Request Information</h2>
-        if (hasParameters)
-        {
-            <h3>Parameters</h3>
-            @Html.DisplayFor(apiModel => apiModel.ApiDescription.ParameterDescriptions, "Parameters")
-        }
-        if (hasRequestSamples)
-        {
-            <h3>Request body formats</h3>
-            @Html.DisplayFor(apiModel => apiModel.SampleRequests, "Samples")
-        }
-    } 
-
-    @if (hasResponseSamples)
-    {
-        <h2>Response Information</h2>
-        if (description.ResponseDescription.Documentation != null)
-        {
-            <p>@description.ResponseDescription.Documentation</p>
-        }
-        else
-        {
-            <p>No documentation available.</p>
-        }
-        <h3>Response body formats</h3>
-        @Html.DisplayFor(apiModel => apiModel.SampleResponses, "Samples")
+        <h3>Request Formats</h3>
+        @Html.DisplayFor(m => m.SampleRequests, "Samples")
     }
+
+    <h2>Response Information</h2>
+
+    <h3>Resource Description</h3>
+
+    <p>@description.ResponseDescription.Documentation</p>
+
+    @if (Model.ResourceDescription != null)
+    {
+        @Html.DisplayFor(m => m.ResourceDescription.ModelType, "ModelDescriptionLink", new { modelDescription = Model.ResourceDescription })
+        if (Model.ResourceProperties != null)
+        {
+            @Html.DisplayFor(m => m.ResourceProperties, "Parameters")
+        }
+    }
+    else
+    {
+        <p>None.</p>
+    }
+
+    @if (Model.SampleResponses.Count > 0)
+    {
+        <h3>Response Formats</h3>
+        @Html.DisplayFor(m => m.SampleResponses, "Samples")
+    }
+
 </div>

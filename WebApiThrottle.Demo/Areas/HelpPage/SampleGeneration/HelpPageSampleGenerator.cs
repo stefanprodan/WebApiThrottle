@@ -28,6 +28,10 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
             ActualHttpMessageTypes = new Dictionary<HelpPageSampleKey, Type>();
             ActionSamples = new Dictionary<HelpPageSampleKey, object>();
             SampleObjects = new Dictionary<Type, object>();
+            SampleObjectFactories = new List<Func<HelpPageSampleGenerator, Type, object>>
+            {
+                DefaultSampleObjectFactory,
+            };
         }
 
         /// <summary>
@@ -44,6 +48,18 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
         /// Gets the objects that are serialized as samples by the supported formatters.
         /// </summary>
         public IDictionary<Type, object> SampleObjects { get; internal set; }
+
+        /// <summary>
+        /// Gets factories for the objects that the supported formatters will serialize as samples. Processed in order,
+        /// stopping when the factory successfully returns a non-<see langref="null"/> object.
+        /// </summary>
+        /// <remarks>
+        /// Collection includes just <see cref="ObjectGenerator.GenerateObject(Type)"/> initially. Use
+        /// <code>SampleObjectFactories.Insert(0, func)</code> to provide an override and
+        /// <code>SampleObjectFactories.Add(func)</code> to provide a fallback.</remarks>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "This is an appropriate nesting of generic types")]
+        public IList<Func<HelpPageSampleGenerator, Type, object>> SampleObjectFactories { get; private set; }
 
         /// <summary>
         /// Gets the request body samples for a given <see cref="ApiDescription"/>.
@@ -134,12 +150,14 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
         {
             object sample;
 
-            // First, try get sample provided for a specific mediaType, controllerName, actionName and parameterNames.
-            // If not found, try get the sample provided for a specific mediaType, controllerName and actionName regardless of the parameterNames
-            // If still not found, try get the sample provided for a specific type and mediaType 
+            // First, try to get the sample provided for the specified mediaType, sampleDirection, controllerName, actionName and parameterNames.
+            // If not found, try to get the sample provided for the specified mediaType, sampleDirection, controllerName and actionName regardless of the parameterNames.
+            // If still not found, try to get the sample provided for the specified mediaType and type.
+            // Finally, try to get the sample provided for the specified mediaType.
             if (ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, parameterNames), out sample) ||
                 ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, sampleDirection, controllerName, actionName, new[] { "*" }), out sample) ||
-                ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, type), out sample))
+                ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType, type), out sample) ||
+                ActionSamples.TryGetValue(new HelpPageSampleKey(mediaType), out sample))
             {
                 return sample;
             }
@@ -149,22 +167,58 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
 
         /// <summary>
         /// Gets the sample object that will be serialized by the formatters. 
-        /// First, it will look at the <see cref="SampleObjects"/>. If no sample object is found, it will try to create one using <see cref="ObjectGenerator"/>.
+        /// First, it will look at the <see cref="SampleObjects"/>. If no sample object is found, it will try to create
+        /// one using <see cref="DefaultSampleObjectFactory"/> (which wraps an <see cref="ObjectGenerator"/>) and other
+        /// factories in <see cref="SampleObjectFactories"/>.
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>The sample object.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification = "Even if all items in SampleObjectFactories throw, problem will be visible as missing sample.")]
         public virtual object GetSampleObject(Type type)
         {
             object sampleObject;
 
             if (!SampleObjects.TryGetValue(type, out sampleObject))
             {
-                // Try create a default sample object
-                ObjectGenerator objectGenerator = new ObjectGenerator();
-                sampleObject = objectGenerator.GenerateObject(type);
+                // No specific object available, try our factories.
+                foreach (Func<HelpPageSampleGenerator, Type, object> factory in SampleObjectFactories)
+                {
+                    if (factory == null)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        sampleObject = factory(this, type);
+                        if (sampleObject != null)
+                        {
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore any problems encountered in the factory; go on to the next one (if any).
+                    }
+                }
             }
 
             return sampleObject;
+        }
+
+        /// <summary>
+        /// Resolves the actual type of <see cref="System.Net.Http.ObjectContent{T}"/> passed to the <see cref="System.Net.Http.HttpRequestMessage"/> in an action.
+        /// </summary>
+        /// <param name="api">The <see cref="ApiDescription"/>.</param>
+        /// <returns>The type.</returns>
+        public virtual Type ResolveHttpRequestMessageType(ApiDescription api)
+        {
+            string controllerName = api.ActionDescriptor.ControllerDescriptor.ControllerName;
+            string actionName = api.ActionDescriptor.ActionName;
+            IEnumerable<string> parameterNames = api.ParameterDescriptions.Select(p => p.Name);
+            Collection<MediaTypeFormatter> formatters;
+            return ResolveType(api, controllerName, actionName, parameterNames, SampleDirection.Request, out formatters);
         }
 
         /// <summary>
@@ -283,7 +337,7 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
                     "An exception has occurred while using the formatter '{0}' to generate sample for media type '{1}'. Exception message: {2}",
                     formatter.GetType().Name,
                     mediaType.MediaType,
-                    e.Message));
+                    UnwrapException(e).Message));
             }
             finally
             {
@@ -298,6 +352,24 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
             }
 
             return sample;
+        }
+
+        internal static Exception UnwrapException(Exception exception)
+        {
+            AggregateException aggregateException = exception as AggregateException;
+            if (aggregateException != null)
+            {
+                return aggregateException.Flatten().InnerException;
+            }
+            return exception;
+        }
+
+        // Default factory for sample objects
+        private static object DefaultSampleObjectFactory(HelpPageSampleGenerator sampleGenerator, Type type)
+        {
+            // Try to create a default sample object
+            ObjectGenerator objectGenerator = new ObjectGenerator();
+            return objectGenerator.GenerateObject(type);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Handling the failure by returning the original string.")]

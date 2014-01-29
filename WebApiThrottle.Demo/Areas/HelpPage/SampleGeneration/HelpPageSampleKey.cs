@@ -11,25 +11,36 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
     public class HelpPageSampleKey
     {
         /// <summary>
-        /// Creates a new <see cref="HelpPageSampleKey"/> based on media type and CLR type.
+        /// Creates a new <see cref="HelpPageSampleKey"/> based on media type.
         /// </summary>
         /// <param name="mediaType">The media type.</param>
-        /// <param name="type">The CLR type.</param>
-        public HelpPageSampleKey(MediaTypeHeaderValue mediaType, Type type)
+        public HelpPageSampleKey(MediaTypeHeaderValue mediaType)
         {
             if (mediaType == null)
             {
                 throw new ArgumentNullException("mediaType");
             }
+
+            ActionName = String.Empty;
+            ControllerName = String.Empty;
+            MediaType = mediaType;
+            ParameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="HelpPageSampleKey"/> based on media type and CLR type.
+        /// </summary>
+        /// <param name="mediaType">The media type.</param>
+        /// <param name="type">The CLR type.</param>
+        public HelpPageSampleKey(MediaTypeHeaderValue mediaType, Type type)
+            : this(mediaType)
+        {
             if (type == null)
             {
                 throw new ArgumentNullException("type");
             }
-            ControllerName = String.Empty;
-            ActionName = String.Empty;
-            ParameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             ParameterType = type;
-            MediaType = mediaType;
         }
 
         /// <summary>
@@ -57,6 +68,7 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
             {
                 throw new ArgumentNullException("parameterNames");
             }
+
             ControllerName = controllerName;
             ActionName = actionName;
             ParameterNames = new HashSet<string>(parameterNames, StringComparer.OrdinalIgnoreCase);
@@ -72,32 +84,14 @@ namespace WebApiThrottle.Demo.Areas.HelpPage
         /// <param name="actionName">Name of the action.</param>
         /// <param name="parameterNames">The parameter names.</param>
         public HelpPageSampleKey(MediaTypeHeaderValue mediaType, SampleDirection sampleDirection, string controllerName, string actionName, IEnumerable<string> parameterNames)
+            : this(sampleDirection, controllerName, actionName, parameterNames)
         {
             if (mediaType == null)
             {
                 throw new ArgumentNullException("mediaType");
             }
-            if (!Enum.IsDefined(typeof(SampleDirection), sampleDirection))
-            {
-                throw new InvalidEnumArgumentException("sampleDirection", (int)sampleDirection, typeof(SampleDirection));
-            }
-            if (controllerName == null)
-            {
-                throw new ArgumentNullException("controllerName");
-            }
-            if (actionName == null)
-            {
-                throw new ArgumentNullException("actionName");
-            }
-            if (parameterNames == null)
-            {
-                throw new ArgumentNullException("parameterNames");
-            }
-            ControllerName = controllerName;
-            ActionName = actionName;
+
             MediaType = mediaType;
-            ParameterNames = new HashSet<string>(parameterNames, StringComparer.OrdinalIgnoreCase);
-            SampleDirection = sampleDirection;
         }
 
         /// <summary>
