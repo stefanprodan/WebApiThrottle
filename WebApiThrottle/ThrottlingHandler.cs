@@ -16,11 +16,12 @@ namespace WebApiThrottle
         /// <summary>
         /// Creates a new instance of the <see cref="ThrottlingHandler"/> class.
         /// By default, the <see cref="QuotaExceededResponseCode"/> property 
-        /// is set to 409 (Conflict).
+        /// is set to 429 (Too Many Requests).
         /// </summary>
         public ThrottlingHandler()
         {
-            QuotaExceededResponseCode = HttpStatusCode.Conflict;
+            QuotaExceededResponseCode = (HttpStatusCode)429;
+            Repository = new CacheRepository();
         }
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace WebApiThrottle
         /// <summary>
         /// Gets or sets the value to return as the HTTP status 
         /// code when a request is rejected because of the
-        /// throttling policy.  The default value is 409 (Conflict)
+        /// throttling policy. The default value is 429 (Too Many Requests).
         /// </summary>
         public HttpStatusCode QuotaExceededResponseCode { get; set; }
 
@@ -139,15 +140,18 @@ namespace WebApiThrottle
                 {
                     //log blocked request
                     if (Logger != null) Logger.Log(ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, request));
-
-                    //break execution and return 409 
+                   
                     string message;
                     if (!string.IsNullOrEmpty(QuotaExceededMessage))
                         message = QuotaExceededMessage;
                     else
                         message = "API calls quota exceeded! maximum admitted {0} per {1}.";
 
-                    return QuotaExceededResponse(request, string.Format(message, rateLimit, rateLimitPeriod), QuotaExceededResponseCode);
+                    //break execution
+                    return QuotaExceededResponse(request,
+                        string.Format(message, rateLimit, rateLimitPeriod),
+                        QuotaExceededResponseCode,
+                        RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
                 }
             }
 
@@ -230,6 +234,29 @@ namespace WebApiThrottle
             return hex;
         }
 
+        private string RetryAfterFrom(DateTime timestamp, RateLimitPeriod period)
+        {
+            var secondsPast = Convert.ToInt32((DateTime.UtcNow - timestamp).TotalSeconds);
+            var retryAfter = 1;
+            switch (period)
+            {
+                case RateLimitPeriod.Minute:
+                    retryAfter = 60;
+                    break;
+                case RateLimitPeriod.Hour:
+                    retryAfter = 60 * 60;
+                    break;
+                case RateLimitPeriod.Day:
+                    retryAfter = 60 * 60 * 24;
+                    break;
+                case RateLimitPeriod.Week:
+                    retryAfter = 60 * 60 * 24 * 7;
+                    break;
+            }
+            retryAfter = retryAfter > 1 ? retryAfter - secondsPast : 1;
+            return retryAfter.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+
         protected IPAddress GetClientIp(HttpRequestMessage request)
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
@@ -297,9 +324,11 @@ namespace WebApiThrottle
             return false;
         }
 
-        private Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode)
+        private Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode, string retryAfter)
         {
-            return Task.FromResult(request.CreateResponse(responseCode, message));
+            var response = request.CreateResponse(responseCode, message);
+            response.Headers.Add("Retry-After", new string[] { retryAfter });
+            return Task.FromResult(response);
         }
 
         private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIdentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
