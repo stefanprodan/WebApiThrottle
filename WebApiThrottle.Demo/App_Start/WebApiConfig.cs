@@ -64,6 +64,14 @@ namespace WebApiThrottle.Demo
                 Repository = new CacheRepository(),
                 Logger = new TracingThrottleLogger(traceWriter)
             });
+
+            //Web API throttling load policy from web.config
+            //config.MessageHandlers.Add(new ThrottlingHandler()
+            //{
+            //    Policy = ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+            //    Repository = new CacheRepository(),
+            //    Logger = new TracingThrottleLogger(traceWriter)
+            //});
         }
     }
 }
