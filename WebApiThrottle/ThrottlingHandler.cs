@@ -261,13 +261,40 @@ namespace WebApiThrottle
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
-                return IPAddress.Parse(((HttpContextBase)request.Properties["MS_HttpContext"]).Request.UserHostAddress);
+                IPAddress ipAddress;
+
+                var ok = IPAddress.TryParse(((HttpContextBase)request.Properties["MS_HttpContext"]).Request.UserHostAddress, out ipAddress);
+
+                if (ok)
+                {
+                    return ipAddress;
+                }
             }
 
             if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
             {
-                return IPAddress.Parse(((RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name]).Address);
+                IPAddress ipAddress;
+
+                var ok = IPAddress.TryParse(((RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name]).Address, out ipAddress);
+
+                if (ok)
+                {
+                    return ipAddress;
+                }
             }
+
+            if (request.Properties.ContainsKey("MS_OwinContext"))
+            {
+                IPAddress ipAddress;
+
+                var ok = IPAddress.TryParse(((Microsoft.Owin.OwinContext)request.Properties["MS_OwinContext"]).Request.RemoteIpAddress, out ipAddress);
+
+                if (ok)
+                {
+                    return ipAddress;
+                }
+            }
+
 
             return null;
         }
