@@ -259,10 +259,10 @@ namespace WebApiThrottle
 
         protected IPAddress GetClientIp(HttpRequestMessage request)
         {
+            IPAddress ipAddress;
+
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
-                IPAddress ipAddress;
-
                 var ok = IPAddress.TryParse(((HttpContextBase)request.Properties["MS_HttpContext"]).Request.UserHostAddress, out ipAddress);
 
                 if (ok)
@@ -273,8 +273,6 @@ namespace WebApiThrottle
 
             if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
             {
-                IPAddress ipAddress;
-
                 var ok = IPAddress.TryParse(((RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name]).Address, out ipAddress);
 
                 if (ok)
@@ -285,8 +283,6 @@ namespace WebApiThrottle
 
             if (request.Properties.ContainsKey("MS_OwinContext"))
             {
-                IPAddress ipAddress;
-
                 var ok = IPAddress.TryParse(((Microsoft.Owin.OwinContext)request.Properties["MS_OwinContext"]).Request.RemoteIpAddress, out ipAddress);
 
                 if (ok)
