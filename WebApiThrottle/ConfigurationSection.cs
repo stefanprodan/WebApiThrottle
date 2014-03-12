@@ -9,89 +9,89 @@ namespace WebApiThrottle
 {
     public class ThrottlePolicyConfiguration : ConfigurationSection
     {
-        [ConfigurationProperty("LimitPerSecond", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerSecond", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerSecond
         {
             get
             {
-                return (long)this["LimitPerSecond"];
+                return (long)this["limitPerSecond"];
             }
         }
 
-        [ConfigurationProperty("LimitPerMinute", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerMinute", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerMinute
         {
             get
             {
-                return (long)this["LimitPerMinute"];
+                return (long)this["limitPerMinute"];
             }
         }
 
-        [ConfigurationProperty("LimitPerHour", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerHour", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerHour
         {
             get
             {
-                return (long)this["LimitPerHour"];
+                return (long)this["limitPerHour"];
             }
         }
 
-        [ConfigurationProperty("LimitPerDay", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerDay", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerDay
         {
             get
             {
-                return (long)this["LimitPerDay"];
+                return (long)this["limitPerDay"];
             }
         }
 
-        [ConfigurationProperty("LimitPerWeek", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerWeek", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerWeek
         {
             get
             {
-                return (long)this["LimitPerWeek"];
+                return (long)this["limitPerWeek"];
             }
         }
 
-        [ConfigurationProperty("IpThrottling", DefaultValue = "false", IsRequired = false)]
+        [ConfigurationProperty("ipThrottling", DefaultValue = "false", IsRequired = false)]
         public bool IpThrottling
         {
             get
             {
-                return (bool)this["IpThrottling"];
+                return (bool)this["ipThrottling"];
             }
         }
 
-        [ConfigurationProperty("ClientThrottling", DefaultValue = "false", IsRequired = false)]
+        [ConfigurationProperty("clientThrottling", DefaultValue = "false", IsRequired = false)]
         public bool ClientThrottling
         {
             get
             {
-                return (bool)this["ClientThrottling"];
+                return (bool)this["clientThrottling"];
             }
         }
 
-        [ConfigurationProperty("EndpointThrottling", DefaultValue = "false", IsRequired = false)]
+        [ConfigurationProperty("endpointThrottling", DefaultValue = "false", IsRequired = false)]
         public bool EndpointThrottling
         {
             get
             {
-                return (bool)this["EndpointThrottling"];
+                return (bool)this["endpointThrottling"];
             }
         }
 
-        [ConfigurationProperty("StackBlockedRequests", DefaultValue = "false", IsRequired = false)]
+        [ConfigurationProperty("stackBlockedRequests", DefaultValue = "false", IsRequired = false)]
         public bool StackBlockedRequests
         {
             get
             {
-                return (bool)this["StackBlockedRequests"];
+                return (bool)this["stackBlockedRequests"];
             }
         }
 
@@ -116,71 +116,71 @@ namespace WebApiThrottle
 
     public class ThrottlePolicyRuleConfigurationElement : ConfigurationElement
     {
-        [ConfigurationProperty("LimitPerSecond", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerSecond", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerSecond
         {
             get
             {
-                return (long)this["LimitPerSecond"];
+                return (long)this["limitPerSecond"];
             }
         }
 
-        [ConfigurationProperty("LimitPerMinute", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerMinute", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerMinute
         {
             get
             {
-                return (long)this["LimitPerMinute"];
+                return (long)this["limitPerMinute"];
             }
         }
 
-        [ConfigurationProperty("LimitPerHour", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerHour", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerHour
         {
             get
             {
-                return (long)this["LimitPerHour"];
+                return (long)this["limitPerHour"];
             }
         }
 
-        [ConfigurationProperty("LimitPerDay", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerDay", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerDay
         {
             get
             {
-                return (long)this["LimitPerDay"];
+                return (long)this["limitPerDay"];
             }
         }
 
-        [ConfigurationProperty("LimitPerWeek", DefaultValue = "0", IsRequired = false)]
+        [ConfigurationProperty("limitPerWeek", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
         public long LimitPerWeek
         {
             get
             {
-                return (long)this["LimitPerWeek"];
+                return (long)this["limitPerWeek"];
             }
         }
 
-        [ConfigurationProperty("Entry", IsRequired = true)]
+        [ConfigurationProperty("entry", IsRequired = true)]
         public string Entry
         {
             get
             {
-                return this["Entry"] as string;
+                return this["entry"] as string;
             }
         }
 
-        [ConfigurationProperty("PolicyType", IsRequired = true)]
+        [ConfigurationProperty("policyType", IsRequired = true)]
         public int PolicyType
         {
             get
             {
-                return (int)this["PolicyType"];
+                return (int)this["policyType"];
             }
         }
     }
@@ -201,21 +201,21 @@ namespace WebApiThrottle
 
     public class ThrottlePolicyWhitelistConfigurationElement : ConfigurationElement
     {
-        [ConfigurationProperty("Entry", IsRequired = true)]
+        [ConfigurationProperty("entry", IsRequired = true)]
         public string Entry
         {
             get
             {
-                return this["Entry"] as string;
+                return this["entry"] as string;
             }
         }
 
-        [ConfigurationProperty("PolicyType", IsRequired = true)]
+        [ConfigurationProperty("policyType", IsRequired = true)]
         public int PolicyType
         {
             get
             {
-                return (int)this["PolicyType"];
+                return (int)this["policyType"];
             }
         }
     }
