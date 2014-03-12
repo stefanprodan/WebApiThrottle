@@ -14,6 +14,8 @@
     <language>en-US</language>
     <dependencies>
       <dependency id="Microsoft.AspNet.WebApi" version="5.0.0" />
+      <dependency id="Newtonsoft.Json" version="4.5.11" />
+      <dependency id="Microsoft.Owin" version="2.0.0" />
     </dependencies>
   </metadata>
   <files>
