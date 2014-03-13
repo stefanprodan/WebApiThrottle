@@ -23,7 +23,7 @@ namespace WebApiThrottler.SelfHostOwinDemo
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            //Web API throttling load policy from web.config
+            //Web API throttling load policy from app.config
             config.MessageHandlers.Add(new ThrottlingHandler()
             {
                 Policy = ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
