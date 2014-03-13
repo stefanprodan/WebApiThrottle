@@ -31,6 +31,31 @@ public static class WebApiConfig
 }
 ```
 
+If you are self-hosting WebApi with Owin, then you'll have to switch to <code>MemoryCacheRepository</code> that uses the runtime memory cache instead of <code>CacheRepository</code> that uses ASP.NET cache.
+
+``` cs
+public class Startup
+{
+    public void Configuration(IAppBuilder appBuilder)
+    {
+        // Configure Web API for self-host. 
+        HttpConfiguration config = new HttpConfiguration();
+
+        //Register throttling handler
+        config.MessageHandlers.Add(new ThrottlingHandler()
+        {
+            Policy = new ThrottlePolicy(perSecond: 1, perMinute: 20, perHour: 200, perDay: 1500, perWeek: 3000)
+            {
+                IpThrottling = true
+            },
+            Repository = new MemoryCacheRepository()
+        });
+
+        appBuilder.UseWebApi(config);
+    }
+}
+```
+
 ###Endpoint throttling based on IP
 
 If, from the same IP, in the same second, you'll make two calls to <code>api/values</code>, the last call will get blocked.
@@ -156,6 +181,56 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
+###Define rate limits in web.config or app.config
+
+WebApiThrottle comes with a custom configuration section that lets you define the throttle policy as xml.
+
+``` cs
+config.MessageHandlers.Add(new ThrottlingHandler()
+{
+    Policy = ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+    Repository = new CacheRepository()
+});
+```
+
+Config example (policyType values are 1 - IP, 2 - ClientKey, 3 - Endpoint):
+``` xml
+<configuration>
+  
+  <configSections>
+    <section name="throttlePolicy" 
+             type="WebApiThrottle.ThrottlePolicyConfiguration, WebApiThrottle" />
+  </configSections>
+  
+  <throttlePolicy limitPerSecond="1" 
+                  limitPerMinute="10" 
+                  limitPerHour="30" 
+                  limitPerDay="300" 
+                  limitPerWeek ="1500" 
+                  ipThrottling="true" 
+                  clientThrottling="true" 
+                  endpointThrottling="true">
+    <rules>
+      <add policyType="1" entry="::1/10"
+           limitPerSecond="2"
+           limitPerMinute="15"/>
+      <add policyType="1" entry="192.168.2.1"
+           limitPerMinute="12" />
+      <add policyType="2" entry="api-client-key-1"
+           limitPerHour="60" />
+      <add policyType="3" entry="api/values"
+           limitPerDay="120" />
+    </rules>
+    <whitelists>
+      <add policyType="1" entry="127.0.0.1" />
+      <add policyType="1" entry="192.168.0.0/24" />
+      <add policyType="2" entry="api-admin-key" />
+    </whitelists>
+  </throttlePolicy>
+
+</configuration>
+``` 
+
 ###Retrieving API Client Key
 
 By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value. 
@@ -175,9 +250,10 @@ public class CustomThrottlingHandler : ThrottlingHandler
 	}
 }
 ```
+
 ###Storing throttle metrics 
 
-WebApiThrottle stores all request data in-memory using ASP.NET Cache. If you want to change the storage to 
+WebApiThrottle stores all request data in-memory using ASP.NET Cache when hosted in IIS or Runtime MemoryCache when self-hosted with Owin. If you want to change the storage to 
 Velocity, MemCache or a NoSQL database, all you have to do is create your own repository by implementing the IThrottleRepository interface. 
 
 ``` cs
@@ -206,20 +282,38 @@ public interface IThrottleLogger
 }
 ```
 
-Logging implementation example
+Logging implementation example with ITraceWriter
 ``` cs
-public class DebugThrottleLogger : IThrottleLogger
+public class TracingThrottleLogger : IThrottleLogger
 {
-	public void Log(ThrottleLogEntry entry)
-	{
-		Debug.WriteLine("{0} Request {1} has been blocked, quota {2}/{3} exceeded by {4}",
-		   entry.LogDate, entry.RequestId, entry.RateLimit, entry.RateLimitPeriod, entry.TotalRequests);
-	}
+    private readonly ITraceWriter traceWriter;
+        
+    public TracingThrottleLogger(ITraceWriter traceWriter)
+    {
+        this.traceWriter = traceWriter;
+    }
+       
+    public void Log(ThrottleLogEntry entry)
+    {
+        if (null != traceWriter)
+        {
+            traceWriter.Info(entry.Request, "WebApiThrottle",
+                "{0} Request {1} from {2} has been throttled (blocked), quota {3}/{4} exceeded by {5}",
+                entry.LogDate, entry.RequestId, entry.ClientIp, entry.RateLimit, entry.RateLimitPeriod, entry.TotalRequests);
+        }
+    }
 }
 ```
 
-Logging usage example 
+Logging usage example with SystemDiagnosticsTraceWriter
 ``` cs
+var traceWriter = new SystemDiagnosticsTraceWriter()
+{
+    IsVerbose = true
+};
+config.Services.Replace(typeof(ITraceWriter), traceWriter);
+config.EnableSystemDiagnosticsTracing();
+            
 config.MessageHandlers.Add(new ThrottlingHandler()
 {
 	Policy = new ThrottlePolicy(perSecond: 1, perMinute: 30)
@@ -229,6 +323,6 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 		EndpointThrottling = true
 	},
 	Repository = new CacheRepository(),
-	Logger = new DebugThrottleLogger()
+	Logger = new TracingThrottleLogger()
 });
 ```
