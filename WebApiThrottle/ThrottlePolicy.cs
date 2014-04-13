@@ -71,8 +71,10 @@ namespace WebApiThrottle
             policy.StackBlockedRequests = settings.StackBlockedRequests;
 
             policy.IpRules = new Dictionary<string, RateLimits>();
+            policy.ClientRules = new Dictionary<string, RateLimits>();
+            policy.EndpointRules = new Dictionary<string, RateLimits>();
 
-            foreach (var item in rules.Where(r=> r.PolicyType == ThrottlePolicyType.IpThrottling))
+            foreach (var item in rules)
             {
                 var rateLimit = new RateLimits { PerSecond = item.LimitPerSecond, PerMinute = item.LimitPerMinute, PerHour = item.LimitPerHour, PerDay = item.LimitPerDay, PerWeek = item.LimitPerWeek };
 
