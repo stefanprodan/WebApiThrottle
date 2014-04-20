@@ -347,7 +347,7 @@ namespace WebApiThrottle
             return false;
         }
 
-        private Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode, string retryAfter)
+        protected virtual Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode, string retryAfter)
         {
             var response = request.CreateResponse(responseCode, message);
             response.Headers.Add("Retry-After", new string[] { retryAfter });
