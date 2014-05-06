@@ -13,6 +13,8 @@ namespace WebApiThrottle
 {
     public class ThrottlingHandler : DelegatingHandler
     {
+        private ThrottlingCore core;
+
         /// <summary>
         /// Creates a new instance of the <see cref="ThrottlingHandler"/> class.
         /// By default, the <see cref="QuotaExceededResponseCode"/> property 
@@ -22,6 +24,7 @@ namespace WebApiThrottle
         {
             QuotaExceededResponseCode = (HttpStatusCode)429;
             Repository = new CacheRepository();
+            core = new ThrottlingCore();
         }
 
         /// <summary>
@@ -55,11 +58,19 @@ namespace WebApiThrottle
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (!Policy.IpThrottling && !Policy.ClientThrottling && !Policy.EndpointThrottling)
+            {
                 return base.SendAsync(request, cancellationToken);
+            }
+
+            core.Repository = Repository;
+            core.Policy = Policy;
 
             var identity = SetIndentity(request);
-            if (IsWhitelisted(identity))
+
+            if (core.IsWhitelisted(identity))
+            {
                 return base.SendAsync(request, cancellationToken);
+            }
 
             TimeSpan timeSpan = TimeSpan.FromSeconds(1);
 
@@ -78,68 +89,22 @@ namespace WebApiThrottle
                 var rateLimitPeriod = rate.Key;
                 var rateLimit = rate.Value;
 
-                switch (rateLimitPeriod)
-                {
-                    case RateLimitPeriod.Second:
-                        timeSpan = TimeSpan.FromSeconds(1);
-                        break;
-                    case RateLimitPeriod.Minute:
-                        timeSpan = TimeSpan.FromMinutes(1);
-                        break;
-                    case RateLimitPeriod.Hour:
-                        timeSpan = TimeSpan.FromHours(1);
-                        break;
-                    case RateLimitPeriod.Day:
-                        timeSpan = TimeSpan.FromDays(1);
-                        break;
-                    case RateLimitPeriod.Week:
-                        timeSpan = TimeSpan.FromDays(7);
-                        break;
-                }
+                timeSpan = core.GetTimeSpanFromPeriod(rateLimitPeriod);
 
                 //increment counter
                 string requestId;
-                var throttleCounter = ProcessRequest(identity, timeSpan, rateLimitPeriod, out requestId);
+                var throttleCounter = core.ProcessRequest(identity, timeSpan, rateLimitPeriod, out requestId);
 
                 if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
                     continue;
 
-                //apply endpoint rate limits
-                if (Policy.EndpointRules != null)
-                {
-                    var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key.ToLowerInvariant())).ToList();
-                    if (rules.Any())
-                    {
-                        //get the lower limit from all applying rules
-                        var customRate = (from r in rules let rateValue = r.Value.GetLimit(rateLimitPeriod) select rateValue).Min();
-
-                        if (customRate > 0)
-                        {
-                            rateLimit = customRate;
-                        }
-                    }
-                }
-
-                //apply custom rate limit for clients that will override endpoint limits
-                if (Policy.ClientRules != null && Policy.ClientRules.Keys.Contains(identity.ClientKey))
-                {
-                    var limit = Policy.ClientRules[identity.ClientKey].GetLimit(rateLimitPeriod);
-                    if (limit > 0) rateLimit = limit;
-                }
-
-                //enforce ip rate limit as is most specific 
-                string ipRule = null;
-                if (Policy.IpRules != null && ContainsIp(Policy.IpRules.Keys.ToList(), identity.ClientIp, out ipRule))
-                {
-                    var limit = Policy.IpRules[ipRule].GetLimit(rateLimitPeriod);
-                    if (limit > 0) rateLimit = limit;
-                }
+                core.ApplyRules(identity, timeSpan, rateLimitPeriod, ref rateLimit);
 
                 //check if limit is reached
                 if (rateLimit > 0 && throttleCounter.TotalRequests > rateLimit)
                 {
                     //log blocked request
-                    if (Logger != null) Logger.Log(ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, request));
+                    if (Logger != null) Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, request));
                    
                     string message;
                     if (!string.IsNullOrEmpty(QuotaExceededMessage))
@@ -151,7 +116,7 @@ namespace WebApiThrottle
                     return QuotaExceededResponse(request,
                         string.Format(message, rateLimit, rateLimitPeriod),
                         QuotaExceededResponseCode,
-                        RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
+                        core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
                 }
             }
 
@@ -159,192 +124,24 @@ namespace WebApiThrottle
             return base.SendAsync(request, cancellationToken);
         }
 
+        protected IPAddress GetClientIp(HttpRequestMessage request)
+        {
+            return core.GetClientIp(request);
+        }
+
         protected virtual RequestIdentity SetIndentity(HttpRequestMessage request)
         {
             var entry = new RequestIdentity();
-            entry.ClientIp = GetClientIp(request).ToString();
+            entry.ClientIp = core.GetClientIp(request).ToString();
             entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
             entry.ClientKey = request.Headers.Contains("Authorization-Token") ? request.Headers.GetValues("Authorization-Token").First() : "anon";
 
             return entry;
         }
 
-        static readonly object _processLocker = new object();
-        private ThrottleCounter ProcessRequest(RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, out string id)
-        {
-            var throttleCounter = new ThrottleCounter()
-                {
-                    Timestamp = DateTime.UtcNow,
-                    TotalRequests = 1
-                };
-
-            id = ComputeThrottleKey(requestIdentity, period);
-
-            //serial reads and writes
-            lock (_processLocker)
-            {
-                var entry = Repository.FirstOrDefault(id);
-                if (entry.HasValue)
-                {
-                    //entry has not expired
-                    if (entry.Value.Timestamp + timeSpan >= DateTime.UtcNow)
-                    {
-                        //increment request count
-                        var totalRequests = entry.Value.TotalRequests + 1;
-
-                        //deep copy
-                        throttleCounter = new ThrottleCounter
-                        {
-                            Timestamp = entry.Value.Timestamp,
-                            TotalRequests = totalRequests
-                        };
-
-                    }
-                }
-
-                //stores: id (string) - timestamp (datetime) - total (long)
-                Repository.Save(id, throttleCounter, timeSpan);
-            }
-
-            return throttleCounter;
-        }
-
         protected virtual string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)
         {
-            var keyValues = new List<string>()
-                {
-                    "throttle"
-                };
-
-            if (Policy.IpThrottling)
-                keyValues.Add(requestIdentity.ClientIp);
-
-            if (Policy.ClientThrottling)
-                keyValues.Add(requestIdentity.ClientKey);
-
-            if (Policy.EndpointThrottling)
-                keyValues.Add(requestIdentity.Endpoint);
-
-            keyValues.Add(period.ToString());
-
-            var id = string.Join("_", keyValues);
-            var idBytes = Encoding.UTF8.GetBytes(id);
-            var hashBytes = new System.Security.Cryptography.SHA1Managed().ComputeHash(idBytes);
-            var hex = BitConverter.ToString(hashBytes).Replace("-", "");
-            return hex;
-        }
-
-        private string RetryAfterFrom(DateTime timestamp, RateLimitPeriod period)
-        {
-            var secondsPast = Convert.ToInt32((DateTime.UtcNow - timestamp).TotalSeconds);
-            var retryAfter = 1;
-            switch (period)
-            {
-                case RateLimitPeriod.Minute:
-                    retryAfter = 60;
-                    break;
-                case RateLimitPeriod.Hour:
-                    retryAfter = 60 * 60;
-                    break;
-                case RateLimitPeriod.Day:
-                    retryAfter = 60 * 60 * 24;
-                    break;
-                case RateLimitPeriod.Week:
-                    retryAfter = 60 * 60 * 24 * 7;
-                    break;
-            }
-            retryAfter = retryAfter > 1 ? retryAfter - secondsPast : 1;
-            return retryAfter.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        }
-
-        protected IPAddress GetClientIp(HttpRequestMessage request)
-        {
-            IPAddress ipAddress;
-
-            if (request.Properties.ContainsKey("MS_HttpContext"))
-            {
-                var ok = IPAddress.TryParse(((HttpContextBase)request.Properties["MS_HttpContext"]).Request.UserHostAddress, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-            if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
-            {
-                var ok = IPAddress.TryParse(((RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name]).Address, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-            if (request.Properties.ContainsKey("MS_OwinContext"))
-            {
-                var ok = IPAddress.TryParse(((Microsoft.Owin.OwinContext)request.Properties["MS_OwinContext"]).Request.RemoteIpAddress, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-
-            return null;
-        }
-
-        private bool IsWhitelisted(RequestIdentity requestIdentity)
-        {
-            if (Policy.IpThrottling)
-                if (Policy.IpWhitelist != null && ContainsIp(Policy.IpWhitelist, requestIdentity.ClientIp))
-                    return true;
-
-            if (Policy.ClientThrottling)
-                if (Policy.ClientWhitelist != null && Policy.ClientWhitelist.Contains(requestIdentity.ClientKey))
-                    return true;
-
-            if (Policy.EndpointThrottling)
-                if (Policy.EndpointWhitelist != null && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x.ToLowerInvariant())))
-                    return true;
-
-            return false;
-        }
-
-        private bool ContainsIp(List<string> ipRules, string clientIp)
-        {
-            var ip = IPAddress.Parse(clientIp);
-            if (ipRules != null && ipRules.Any())
-            {
-                foreach (var rule in ipRules)
-                {
-                    var range = new IPAddressRange(rule);
-                    if (range.Contains(ip)) return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool ContainsIp(List<string> ipRules, string clientIp, out string rule)
-        {
-            rule = null;
-            var ip = IPAddress.Parse(clientIp);
-            if (ipRules != null && ipRules.Any())
-            {
-                foreach (var r in ipRules)
-                {
-                    var range = new IPAddressRange(r);
-                    if (range.Contains(ip))
-                    {
-                        rule = r;
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return core.ComputeThrottleKey(requestIdentity, period);
         }
 
         protected virtual Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode, string retryAfter)
@@ -352,23 +149,6 @@ namespace WebApiThrottle
             var response = request.CreateResponse(responseCode, message);
             response.Headers.Add("Retry-After", new string[] { retryAfter });
             return Task.FromResult(response);
-        }
-
-        private ThrottleLogEntry ComputeLogEntry(string requestId, RequestIdentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
-        {
-            return new ThrottleLogEntry
-                    {
-                        ClientIp = identity.ClientIp,
-                        ClientKey = identity.ClientKey,
-                        Endpoint = identity.Endpoint,
-                        LogDate = DateTime.UtcNow,
-                        RateLimit = rateLimit,
-                        RateLimitPeriod = rateLimitPeriod,
-                        RequestId = requestId,
-                        StartPeriod = throttleCounter.Timestamp,
-                        TotalRequests = throttleCounter.TotalRequests,
-                        Request = request
-                    };
         }
     }
 }
