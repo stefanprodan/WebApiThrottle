@@ -56,7 +56,7 @@ public class Startup
 }
 ```
 
-###Endpoint throttling based on IP
+### Endpoint throttling based on IP
 
 If, from the same IP, in the same second, you'll make two calls to <code>api/values</code>, the last call will get blocked.
 But if in the same second you call <code>api/values/1</code> too, the request will go through because it's a different route.
@@ -73,7 +73,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
-###Endpoint throttling based on IP and Client Key
+### Endpoint throttling based on IP and Client Key
 
 If a client (identified by an unique API key) from the same IP, in the same second, makes two calls to <code>api/values</code>, then the last call will get blocked. 
 If you want to apply limits to clients regardless of their IPs then you should set IpThrottling to false.
@@ -91,7 +91,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
-###IP and/or Client Key White-listing
+### IP and/or Client Key White-listing
 
 If requests are initiated from a white-listed IP or Client, then the throttling policy will not be applied and the requests will not get stored. The IP white-list supports IP v4 and v6 ranges like "192.168.0.0/24", "fe80::/10" and "192.168.0.0-192.168.0.255" for more information check [jsakamoto/ipaddressrange](https://github.com/jsakamoto/ipaddressrange).
 
@@ -110,7 +110,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
-###IP and/or Client Key custom rate limits
+### IP and/or Client Key custom rate limits
 
 You can define custom limits for known IPs or Client Keys, these limits will override the default ones. Be aware that a custom limit will only work if you have defined a global counterpart.
 
@@ -136,7 +136,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 	Repository = new CacheRepository()
 });
 ```
-###Endpoint custom rate limits
+### Endpoint custom rate limits
 
 You can also define custom limits for certain routes, these limits will override the default ones. 
 You can define endpoint rules by providing relative routes like <code>api/entry/1</code> or just a URL segment like <code>/entry/</code>. 
@@ -161,7 +161,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
-###Stack rejected requests
+### Stack rejected requests
 
 By default, rejected calls are not added to the throttle counter. If a client makes 3 requests per second 
 and you've set a limit of one call per second, the minute, hour and day counters will only record the first call, the one that wasn't blocked.
@@ -181,7 +181,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
-###Define rate limits in web.config or app.config
+### Define rate limits in web.config or app.config
 
 WebApiThrottle comes with a custom configuration section that lets you define the throttle policy as xml.
 
@@ -202,28 +202,33 @@ Config example (policyType values are 1 - IP, 2 - ClientKey, 3 - Endpoint):
              type="WebApiThrottle.ThrottlePolicyConfiguration, WebApiThrottle" />
   </configSections>
   
-  <throttlePolicy limitPerSecond="1" 
-                  limitPerMinute="10" 
-                  limitPerHour="30" 
-                  limitPerDay="300" 
-                  limitPerWeek ="1500" 
-                  ipThrottling="true" 
-                  clientThrottling="true" 
+  <throttlePolicy limitPerSecond="1"
+                  limitPerMinute="10"
+                  limitPerHour="30"
+                  limitPerDay="300"
+                  limitPerWeek ="1500"
+                  ipThrottling="true"
+                  clientThrottling="true"
                   endpointThrottling="true">
     <rules>
+      <!--Ip rules-->
       <add policyType="1" entry="::1/10"
            limitPerSecond="2"
            limitPerMinute="15"/>
       <add policyType="1" entry="192.168.2.1"
            limitPerMinute="12" />
+      <!--Client rules-->
       <add policyType="2" entry="api-client-key-1"
            limitPerHour="60" />
+      <!--Endpoint rules-->
       <add policyType="3" entry="api/values"
            limitPerDay="120" />
     </rules>
     <whitelists>
+      <!--Ip whitelist-->
       <add policyType="1" entry="127.0.0.1" />
       <add policyType="1" entry="192.168.0.0/24" />
+      <!--Client whitelist-->
       <add policyType="2" entry="api-admin-key" />
     </whitelists>
   </throttlePolicy>
@@ -231,7 +236,7 @@ Config example (policyType values are 1 - IP, 2 - ClientKey, 3 - Endpoint):
 </configuration>
 ``` 
 
-###Retrieving API Client Key
+### Retrieving API Client Key
 
 By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value. 
 If your API key is stored differently, you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify your own retrieval method.
@@ -251,7 +256,7 @@ public class CustomThrottlingHandler : ThrottlingHandler
 }
 ```
 
-###Storing throttle metrics 
+### Storing throttle metrics 
 
 WebApiThrottle stores all request data in-memory using ASP.NET Cache when hosted in IIS or Runtime MemoryCache when self-hosted with Owin. If you want to change the storage to 
 Velocity, MemCache or a NoSQL database, all you have to do is create your own repository by implementing the IThrottleRepository interface. 
@@ -271,7 +276,7 @@ public interface IThrottleRepository
 }
 ```
 
-###Logging throttled requests
+### Logging throttled requests
 
 If you want to log throttled requests you'll have to implement IThrottleLogger interface and provide it to the ThrottlingHandler. 
 
