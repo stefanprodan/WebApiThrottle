@@ -71,28 +71,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConcurrentDictionaryRepository.cs" />
-    <Compile Include="IPAddressRange.cs" />
-    <Compile Include="IThrottleLogger.cs" />
+    <Compile Include="Repositories\ConcurrentDictionaryRepository.cs" />
+    <Compile Include="Models\IPAddressRange.cs" />
+    <Compile Include="Logging\IThrottleLogger.cs" />
     <Compile Include="IThrottlePolicyProvider.cs" />
-    <Compile Include="IThrottleRepository.cs" />
-    <Compile Include="MemoryCacheRepository.cs" />
-    <Compile Include="PolicyConfigurationProvider.cs" />
+    <Compile Include="Repositories\IThrottleRepository.cs" />
+    <Compile Include="Repositories\MemoryCacheRepository.cs" />
+    <Compile Include="Configuration\PolicyConfigurationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RateLimitPeriod.cs" />
-    <Compile Include="RateLimits.cs" />
-    <Compile Include="ThrottleCounter.cs" />
-    <Compile Include="ThrottleLogEntry.cs" />
+    <Compile Include="Models\RateLimitPeriod.cs" />
+    <Compile Include="Models\RateLimits.cs" />
+    <Compile Include="Models\ThrottleCounter.cs" />
+    <Compile Include="Logging\ThrottleLogEntry.cs" />
     <Compile Include="ThrottlePolicy.cs" />
-    <Compile Include="CacheRepository.cs" />
-    <Compile Include="RequestIdentity.cs" />
-    <Compile Include="ConfigurationSection.cs" />
-    <Compile Include="ThrottlePolicySettings.cs" />
-    <Compile Include="ThrottlePolicyRule.cs" />
-    <Compile Include="ThrottlePolicyType.cs" />
-    <Compile Include="ThrottlePolicyWhitelist.cs" />
+    <Compile Include="Repositories\CacheRepository.cs" />
+    <Compile Include="Models\RequestIdentity.cs" />
+    <Compile Include="Configuration\ThrottlePolicyConfiguration.cs" />
+    <Compile Include="Configuration\ThrottlePolicyRuleConfigurationCollection.cs" />
+    <Compile Include="Configuration\ThrottlePolicyRuleConfigurationElement.cs" />
+    <Compile Include="Models\ThrottlePolicySettings.cs" />
+    <Compile Include="Models\ThrottlePolicyRule.cs" />
+    <Compile Include="Models\ThrottlePolicyType.cs" />
+    <Compile Include="Models\ThrottlePolicyWhitelist.cs" />
+    <Compile Include="Configuration\ThrottlePolicyWhitelistConfigurationCollection.cs" />
+    <Compile Include="Configuration\ThrottlePolicyWhitelistConfigurationElement.cs" />
+    <Compile Include="ThrottlingCore.cs" />
     <Compile Include="ThrottlingHandler.cs" />
-    <Compile Include="TracingThrottleLogger.cs" />
+    <Compile Include="Logging\TracingThrottleLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
