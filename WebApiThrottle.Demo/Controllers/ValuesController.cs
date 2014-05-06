@@ -8,6 +8,7 @@ using System.Web.Http;
 
 namespace WebApiThrottle.Demo.Controllers
 {
+    [EnableThrottling(PerSecond = 1)]
     public class ValuesController : ApiController
     {
         // GET api/values
@@ -17,6 +18,7 @@ namespace WebApiThrottle.Demo.Controllers
         }
 
         // GET api/values/5
+        [DisableThrotting]
         public string Get(int id)
         {
             return "value";
