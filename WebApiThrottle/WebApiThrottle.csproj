@@ -71,6 +71,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DisableThrottingAttribute.cs" />
     <Compile Include="Repositories\ConcurrentDictionaryRepository.cs" />
     <Compile Include="Models\IPAddressRange.cs" />
     <Compile Include="Logging\IThrottleLogger.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Models\RateLimits.cs" />
     <Compile Include="Models\ThrottleCounter.cs" />
     <Compile Include="Logging\ThrottleLogEntry.cs" />
+    <Compile Include="Attributes\EnableThrottlingAttribute.cs" />
     <Compile Include="ThrottlePolicy.cs" />
     <Compile Include="Repositories\CacheRepository.cs" />
     <Compile Include="Models\RequestIdentity.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="Configuration\ThrottlePolicyWhitelistConfigurationCollection.cs" />
     <Compile Include="Configuration\ThrottlePolicyWhitelistConfigurationElement.cs" />
     <Compile Include="ThrottlingCore.cs" />
+    <Compile Include="ThrottlingFilter.cs" />
     <Compile Include="ThrottlingHandler.cs" />
     <Compile Include="Logging\TracingThrottleLogger.cs" />
   </ItemGroup>
