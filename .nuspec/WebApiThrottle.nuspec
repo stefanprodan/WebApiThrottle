@@ -5,10 +5,10 @@
     <authors>Stefan Prodan</authors>
     <owners>Stefan Prodan</owners>
     <id>WebApiThrottle</id>
-    <title>ASP.NET Web API throttling handler</title>
+    <title>ASP.NET Web API throttling</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>WebApiThrottle handler is designed for controlling the rate of requests that clients can make to an API based on IP address, client API key and request route.</description>
-    <copyright>Stefan Prodan 2013</copyright>
+    <description>WebApiThrottle handler and filter are designed for controlling the rate of requests that clients can make to an API based on IP address, client API key and request route. WebApiThrottle is compatible with WebAPI hosted is IIS, Owin with IIS and Owin self-hosted.</description>
+    <copyright>Stefan Prodan 2013-2014</copyright>
     <tags>ASP.NET Web API, Owin, throttling, rate limits</tags>
     <projectUrl>https://github.com/stefanprodan/WebApiThrottle</projectUrl>
     <language>en-US</language>
