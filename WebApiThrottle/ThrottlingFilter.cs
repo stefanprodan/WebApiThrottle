@@ -12,6 +12,8 @@ namespace WebApiThrottle
 {
     public class ThrottlingFilter : ActionFilterAttribute, IActionFilter
     {
+        public string PolicyKey = "throttle_policy";
+
         private ThrottlingCore core;
 
         /// <summary>
@@ -26,10 +28,48 @@ namespace WebApiThrottle
             core = new ThrottlingCore();
         }
 
+        public ThrottlingFilter(ThrottlePolicy policy, IPolicyRepository policyRepository, IThrottleRepository repository, IThrottleLogger logger)
+        {
+            core = new ThrottlingCore();
+            core.Repository = repository;
+            Repository = repository;
+            Logger = logger;
+
+            QuotaExceededResponseCode = (HttpStatusCode)429;
+
+            this.policy = policy;
+            this.policyRepository = policyRepository;
+
+            if (policyRepository != null)
+            {
+                policyRepository.Save(PolicyKey, policy);
+            }
+        }
+
+        private IPolicyRepository policyRepository;
+
+        public IPolicyRepository PolicyRepository
+        {
+            get { return policyRepository; }
+            set { policyRepository = value; }
+        }
+
+        private ThrottlePolicy policy;
+
         /// <summary>
         /// Throttling rate limits policy
         /// </summary>
-        public ThrottlePolicy Policy { get; set; }
+        public ThrottlePolicy Policy
+        {
+            get { return policy; }
+            set
+            {
+                if (policy == null)
+                {
+                    policy = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Throttle metrics storage
@@ -58,6 +98,12 @@ namespace WebApiThrottle
         {
             EnableThrottlingAttribute attrPolicy = null;
             var applyThrottling = ApplyThrottling(actionContext, out attrPolicy);
+            
+            //get policy
+            if(policyRepository != null)
+            {
+                policy = policyRepository.FirstOrDefault(PolicyKey);
+            }
 
             if (Policy != null && applyThrottling)
             {
@@ -70,28 +116,22 @@ namespace WebApiThrottle
                 {
                     TimeSpan timeSpan = TimeSpan.FromSeconds(1);
 
-                    var rates = Policy.Rates.AsEnumerable();
+                    //get default rates
+                    var defRates = core.RatesWithDefaults(Policy.Rates.ToList());
                     if (Policy.StackBlockedRequests)
                     {
-                        //all requests including the rejected ones will stack in this order: day, hour, min, sec
+                        //all requests including the rejected ones will stack in this order: week, day, hour, min, sec
                         //if a client hits the hour limit then the minutes and seconds counters will expire and will eventually get erased from cache
-                        rates = Policy.Rates.Reverse();
+                        defRates.Reverse();
                     }
 
                     //apply policy
-                    foreach (var rate in rates)
+                    foreach (var rate in defRates)
                     {
                         var rateLimitPeriod = rate.Key;
                         var rateLimit = rate.Value;
 
                         timeSpan = core.GetTimeSpanFromPeriod(rateLimitPeriod);
-
-                        //increment counter
-                        string requestId;
-                        var throttleCounter = core.ProcessRequest(identity, timeSpan, rateLimitPeriod, out requestId);
-
-                        if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
-                            continue;
 
                         //apply EnableThrottlingAttribute policy
                         var attrLimit = attrPolicy.GetLimit(rateLimitPeriod);
@@ -103,23 +143,34 @@ namespace WebApiThrottle
                         //apply global rules
                         core.ApplyRules(identity, timeSpan, rateLimitPeriod, ref rateLimit);
 
-                        //check if limit is reached
-                        if (rateLimit > 0 && throttleCounter.TotalRequests > rateLimit)
+                        if (rateLimit > 0)
                         {
-                            //log blocked request
-                            if (Logger != null) Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, actionContext.Request));
+                            //increment counter
+                            string requestId;
+                            var throttleCounter = core.ProcessRequest(identity, timeSpan, rateLimitPeriod, out requestId);
 
-                            string message;
-                            if (!string.IsNullOrEmpty(QuotaExceededMessage))
-                                message = QuotaExceededMessage;
-                            else
-                                message = "API calls quota exceeded! maximum admitted {0} per {1}.";
+                            //check if key expired
+                            if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
+                                continue;
 
-                            //add status code and retry after x seconds to response
-                            actionContext.Response = QuotaExceededResponse(actionContext.Request,
-                                string.Format(message, rateLimit, rateLimitPeriod),
-                                QuotaExceededResponseCode,
-                                core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
+                            //check if limit is reached
+                            if (throttleCounter.TotalRequests > rateLimit)
+                            {
+                                //log blocked request
+                                if (Logger != null) Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, actionContext.Request));
+
+                                string message;
+                                if (!string.IsNullOrEmpty(QuotaExceededMessage))
+                                    message = QuotaExceededMessage;
+                                else
+                                    message = "API calls quota exceeded! maximum admitted {0} per {1}.";
+
+                                //add status code and retry after x seconds to response
+                                actionContext.Response = QuotaExceededResponse(actionContext.Request,
+                                    string.Format(message, rateLimit, rateLimitPeriod),
+                                    QuotaExceededResponseCode,
+                                    core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
+                            }
                         }
                     }
                 }

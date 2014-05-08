@@ -174,6 +174,16 @@ namespace WebApiThrottle
             return hex;
         }
 
+        internal List<KeyValuePair<RateLimitPeriod, long>> RatesWithDefaults(List<KeyValuePair<RateLimitPeriod, long>> defRates)
+        {
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Second)) defRates.Insert(0, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Second, 0));
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Minute)) defRates.Insert(1, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Minute, 0));
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Hour)) defRates.Insert(2, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Hour, 0));
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Day)) defRates.Insert(3, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Day, 0));
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Week)) defRates.Insert(4, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Week, 0));
+            return defRates;
+        }
+
         static readonly object _processLocker = new object();
         internal ThrottleCounter ProcessRequest(RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, out string id)
         {
