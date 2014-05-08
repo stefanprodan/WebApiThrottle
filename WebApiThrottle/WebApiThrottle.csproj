@@ -72,6 +72,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\DisableThrottingAttribute.cs" />
+    <Compile Include="Repositories\IPolicyRepository.cs" />
+    <Compile Include="Repositories\PolicyCacheRepository.cs" />
     <Compile Include="Repositories\ConcurrentDictionaryRepository.cs" />
     <Compile Include="Models\IPAddressRange.cs" />
     <Compile Include="Logging\IThrottleLogger.cs" />
