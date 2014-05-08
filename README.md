@@ -1,7 +1,7 @@
 WebApiThrottle
 ==============
 
-ASP.NET Web API Throttling handler is designed to control the rate of requests that clients 
+ASP.NET Web API Throttling handler and filter are designed to control the rate of requests that clients 
 can make to a Web API based on IP address, client API key and request route. 
 WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrottle](https://www.nuget.org/packages/WebApiThrottle/).
 
@@ -310,7 +310,7 @@ public class TracingThrottleLogger : IThrottleLogger
 }
 ```
 
-Logging usage example with SystemDiagnosticsTraceWriter
+Logging usage example with SystemDiagnosticsTraceWriter and ThrottlingHandler
 ``` cs
 var traceWriter = new SystemDiagnosticsTraceWriter()
 {
@@ -328,6 +328,63 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 		EndpointThrottling = true
 	},
 	Repository = new CacheRepository(),
-	Logger = new TracingThrottleLogger()
+	Logger = new TracingThrottleLogger(traceWriter)
 });
+```
+
+### Attribute-based rate limiting with ThrottlingFilter and EnableThrottlingAttribute
+
+As an alternative to the ThrottlingHandler, ThrottlingFilter does the same thing but allows custom rate limits to be specified by decorating Web API controllers and actions with EnableThrottlingAttribute. Be aware that when a request is processed ThrottlingHandler executes early before the http controller dispatcher, there for is preferable to the ThrottlingFilter that needs a controller context to function.
+
+Setup the filter as you would with ThrottlingHandler:
+
+``` cs
+config.Filters.Add(new ThrottlingFilter()
+{
+    Policy = new ThrottlePolicy(perSecond: 1, perMinute: 20, 
+    perHour: 200, perDay: 2000, perWeek: 10000)
+    {
+        //scope to IPs
+        IpThrottling = true,
+        IpRules = new Dictionary<string, RateLimits>
+        { 
+            { "::1/10", new RateLimits { PerSecond = 2 } },
+            { "192.168.2.1", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
+        },
+        //white list the "::1" IP to disable throttling on localhost
+        IpWhitelist = new List<string> { "127.0.0.1", "192.168.0.0/24" },
+
+        //scope to clients (if IP throttling is applied then the scope becomes a combination of IP and client key)
+        ClientThrottling = true,
+        ClientRules = new Dictionary<string, RateLimits>
+        { 
+            { "api-client-key-demo", new RateLimits { PerDay = 5000 } }
+        },
+        //white list API keys that don’t require throttling
+        ClientWhitelist = new List<string> { "admin-key" },
+
+        //Endpoint rate limits will be loaded from EnableThrottling attribute
+        EndpointThrottling = true
+    }
+});
+```
+
+Use the attributes to toggle throttling and set rate limits:
+
+``` cs
+[EnableThrottling(PerSecond = 2)]
+public class ValuesController : ApiController
+{
+    [EnableThrottling(PerSecond = 1, PerMinute = 30, PerHour = 100)]
+    public IEnumerable<string> Get()
+    {
+        return new string[] { "value1", "value2" };
+    }
+
+    [DisableThrotting]
+    public string Get(int id)
+    {
+        return "value";
+    }
+}
 ```
