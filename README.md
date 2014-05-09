@@ -334,9 +334,9 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ### Attribute-based rate limiting with ThrottlingFilter and EnableThrottlingAttribute
 
-As an alternative to the ThrottlingHandler, ThrottlingFilter does the same thing but allows custom rate limits to be specified by decorating Web API controllers and actions with EnableThrottlingAttribute. Be aware that when a request is processed ThrottlingHandler executes early before the http controller dispatcher, there for is preferable to the ThrottlingFilter that needs a controller context to function.
+As an alternative to the ThrottlingHandler, ThrottlingFilter does the same thing but allows custom rate limits to be specified by decorating Web API controllers and actions with EnableThrottlingAttribute. Be aware that when a request is processed, the ThrottlingHandler executes before the http controller dispatcher in the [Web API request pypeline](http://www.asp.net/posters/web-api/asp.net-web-api-poster-grayscale.pdf), therefore it is preferable that you always use the handler instead of the filter when you don't need the features that the ThrottlingFilter provides.
 
-Setup the filter as you would with ThrottlingHandler:
+Setup the filter as you would the ThrottlingHandler:
 
 ``` cs
 config.Filters.Add(new ThrottlingFilter()
