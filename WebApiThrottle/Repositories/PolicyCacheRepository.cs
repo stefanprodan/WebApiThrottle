@@ -8,6 +8,9 @@ using System.Web.Caching;
 
 namespace WebApiThrottle
 {
+    /// <summary>
+    /// Stors policy in asp.net cache
+    /// </summary>
     public class PolicyCacheRepository : IPolicyRepository
     {
         public void Save(string id, ThrottlePolicy policy)
