@@ -153,7 +153,7 @@ namespace WebApiThrottle
         {
             var keyValues = new List<string>()
                 {
-                    "throttle"
+                    ThrottleManager.GetThrottleKey()
                 };
 
             if (Policy.IpThrottling)

@@ -10,10 +10,11 @@ using System.Web.Http.Filters;
 
 namespace WebApiThrottle
 {
+    /// <summary>
+    /// Throttle action filter
+    /// </summary>
     public class ThrottlingFilter : ActionFilterAttribute, IActionFilter
     {
-        public string PolicyKey = "throttle_policy";
-
         private ThrottlingCore core;
 
         /// <summary>
@@ -42,12 +43,15 @@ namespace WebApiThrottle
 
             if (policyRepository != null)
             {
-                policyRepository.Save(PolicyKey, policy);
+                policyRepository.Save(ThrottleManager.GetPolicyKey(), policy);
             }
         }
 
         private IPolicyRepository policyRepository;
 
+        /// <summary>
+        ///  Throttling rate limits policy repository
+        /// </summary>
         public IPolicyRepository PolicyRepository
         {
             get { return policyRepository; }
@@ -62,13 +66,7 @@ namespace WebApiThrottle
         public ThrottlePolicy Policy
         {
             get { return policy; }
-            set
-            {
-                if (policy == null)
-                {
-                    policy = value;
-                }
-            }
+            set { policy = value; }
         }
 
         /// <summary>
@@ -98,11 +96,11 @@ namespace WebApiThrottle
         {
             EnableThrottlingAttribute attrPolicy = null;
             var applyThrottling = ApplyThrottling(actionContext, out attrPolicy);
-            
-            //get policy
+
+            //get policy from repo
             if(policyRepository != null)
             {
-                policy = policyRepository.FirstOrDefault(PolicyKey);
+                policy = policyRepository.FirstOrDefault(ThrottleManager.GetPolicyKey());
             }
 
             if (Policy != null && applyThrottling)
