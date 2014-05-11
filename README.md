@@ -154,7 +154,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 		EndpointThrottling = true,
 		EndpointRules = new Dictionary<string, RateLimits>
 		{ 
-			{ "api/search", new RateLimits { PerScond = 10, PerMinute = 100, PerHour = 1000 } }
+			{ "api/search", new RateLimits { PerSecond = 10, PerMinute = 100, PerHour = 1000 } }
 		}
 	},
 	Repository = new CacheRepository()
@@ -258,8 +258,7 @@ public class CustomThrottlingHandler : ThrottlingHandler
 
 ### Storing throttle metrics 
 
-WebApiThrottle stores all request data in-memory using ASP.NET Cache when hosted in IIS or Runtime MemoryCache when self-hosted with Owin. If you want to change the storage to 
-Velocity, MemCache or a NoSQL database, all you have to do is create your own repository by implementing the IThrottleRepository interface. 
+WebApiThrottle stores all request data in-memory using ASP.NET Cache when hosted in IIS or Runtime MemoryCache when self-hosted with Owin. If you want to change the storage to Velocity, Redis or a NoSQL database, all you have to do is create your own repository by implementing the <code>IThrottleRepository</code> interface. 
 
 ``` cs
 public interface IThrottleRepository
@@ -276,11 +275,24 @@ public interface IThrottleRepository
 }
 ```
 
+Since version 1.2 there is an interface for storing and retrieving the policy object as well. The <code>IPolicyRepository</code> is used to update the policy object at runtime.
+
+``` cs
+public interface IPolicyRepository
+{
+    ThrottlePolicy FirstOrDefault(string id);
+    
+    void Remove(string id);
+    
+    void Save(string id, ThrottlePolicy policy);
+}
+```
+
 ### Update rate limits at runtime
 
 In order to update the policy object at runtime you'll need to use the new <code>ThrottlingHandler</code> constructor along with <code>ThrottleManager.UpdatePolicy</code> function introduced in WebApiThrottle v1.2.  
 
-Register the <code>ThrottlingHandler</code> providing <code>PolicyCacheRepository</code> in the constructor, if you are self-hosting the service with Owin then use </code>PolicyMemoryCacheRepository</code>:
+Register the <code>ThrottlingHandler</code> providing <code>PolicyCacheRepository</code> in the constructor, if you are self-hosting the service with Owin then use <code>PolicyMemoryCacheRepository</code>:
 
 ``` cs
 public static void Register(HttpConfiguration config)
@@ -299,35 +311,31 @@ public static void Register(HttpConfiguration config)
         {
             //scope to IPs
             IpThrottling = true,
-            IpRules = new Dictionary<string, RateLimits>
-            { 
-                { "::1/10", new RateLimits { PerSecond = 2 } },
-                { "192.168.2.1", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
-            },
-            //white list the "::1" IP to disable throttling on localhost for Win8
-            IpWhitelist = new List<string> { "127.0.0.1", "192.168.0.0/24" },
-
-            //scope to clients (if IP throttling is applied then the scope becomes a combination of IP and client key)
+            
+            //scope to clients
             ClientThrottling = true,
             ClientRules = new Dictionary<string, RateLimits>
             { 
                 { "api-client-key-1", new RateLimits { PerMinute = 60, PerHour = 600 } },
                 { "api-client-key-2", new RateLimits { PerDay = 5000 } }
             },
-            //white list API keys that don’t require throttling
-            ClientWhitelist = new List<string> { "admin-key" },
 
-            //Endpoint rate limits will be loaded from EnableThrottling attribute
+            //scope to endpoints
             EndpointThrottling = true
         },
+        
+        //replace with PolicyMemoryCacheRepository for Owin self-host
         policyRepository: new PolicyCacheRepository(),
+        
+        //replace with MemoryCacheRepository for Owin self-host
         repository: new CacheRepository(),
+        
         logger: new TracingThrottleLogger(traceWriter)));
 }
 
 ```
 
-When you want to update the policy object call the static method <code>ThrottleManager.UpdatePolicy</code> anyware in you code.
+When you want to update the policy object call the static method <code>ThrottleManager.UpdatePolicy</code> anywhere in you code.
 
 ``` cs
 public void UpdateRateLimits()
