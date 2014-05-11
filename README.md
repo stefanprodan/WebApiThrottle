@@ -258,8 +258,7 @@ public class CustomThrottlingHandler : ThrottlingHandler
 
 ### Storing throttle metrics 
 
-WebApiThrottle stores all request data in-memory using ASP.NET Cache when hosted in IIS or Runtime MemoryCache when self-hosted with Owin. If you want to change the storage to 
-Velocity, MemCache or a NoSQL database, all you have to do is create your own repository by implementing the IThrottleRepository interface. 
+WebApiThrottle stores all request data in-memory using ASP.NET Cache when hosted in IIS or Runtime MemoryCache when self-hosted with Owin. If you want to change the storage to Velocity, Redis or a NoSQL database, all you have to do is create your own repository by implementing the IThrottleRepository interface. 
 
 ``` cs
 public interface IThrottleRepository
@@ -273,6 +272,19 @@ public interface IThrottleRepository
 	void Remove(string id);
 	
 	void Clear();
+}
+```
+
+Since version 1.2 there is an interface for storing and retrieving the policy object as well. The <code>IPolicyRepository</code> is used to update the policy object at runtime.
+
+``` cs
+public interface IPolicyRepository
+{
+    ThrottlePolicy FirstOrDefault(string id);
+    
+    void Remove(string id);
+    
+    void Save(string id, ThrottlePolicy policy);
 }
 ```
 
@@ -308,7 +320,7 @@ public static void Register(HttpConfiguration config)
                 { "api-client-key-2", new RateLimits { PerDay = 5000 } }
             },
 
-            //cope to endpoints
+            //scope to endpoints
             EndpointThrottling = true
         },
         
@@ -323,7 +335,7 @@ public static void Register(HttpConfiguration config)
 
 ```
 
-When you want to update the policy object call the static method <code>ThrottleManager.UpdatePolicy</code> anyware in you code.
+When you want to update the policy object call the static method <code>ThrottleManager.UpdatePolicy</code> anywhere in you code.
 
 ``` cs
 public void UpdateRateLimits()
