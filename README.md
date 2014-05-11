@@ -280,7 +280,7 @@ public interface IThrottleRepository
 
 In order to update the policy object at runtime you'll need to use the new <code>ThrottlingHandler</code> constructor along with <code>ThrottleManager.UpdatePolicy</code> function introduced in WebApiThrottle v1.2.  
 
-Register the <code>ThrottlingHandler</code> providing <code>PolicyCacheRepository</code> in the constructor:
+Register the <code>ThrottlingHandler</code> providing <code>PolicyCacheRepository</code> in the constructor, if you are self-hosting the service with Owin then use </code>PolicyMemoryCacheRepository</code>:
 
 ``` cs
 public static void Register(HttpConfiguration config)
@@ -312,7 +312,7 @@ public static void Register(HttpConfiguration config)
             ClientRules = new Dictionary<string, RateLimits>
             { 
                 { "api-client-key-1", new RateLimits { PerMinute = 60, PerHour = 600 } },
-                { "api-client-key-9", new RateLimits { PerDay = 5000 } }
+                { "api-client-key-2", new RateLimits { PerDay = 5000 } }
             },
             //white list API keys that don’t require throttling
             ClientWhitelist = new List<string> { "admin-key" },
@@ -328,6 +328,29 @@ public static void Register(HttpConfiguration config)
 ```
 
 When you want to update the policy object call the static method <code>ThrottleManager.UpdatePolicy</code> anyware in you code.
+
+``` cs
+public void UpdateRateLimits()
+{
+    //init policy repo
+    var policyRepository = new PolicyCacheRepository();
+
+    //get policy object from cache
+    var policy = policyRepository.FirstOrDefault(ThrottleManager.GetPolicyKey());
+
+    //update client rate limits
+    policy.ClientRules["api-client-key-1"] =
+        new RateLimits { PerMinute = 80, PerHour = 800 };
+
+    //add new client rate limits
+    policy.ClientRules.Add("api-client-key-3",
+        new RateLimits { PerMinute = 60, PerHour = 600 });
+
+    //apply policy updates
+    ThrottleManager.UpdatePolicy(policy, policyRepository);
+
+}
+```
 
 ### Logging throttled requests
 
