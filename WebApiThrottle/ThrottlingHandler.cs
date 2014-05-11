@@ -30,6 +30,29 @@ namespace WebApiThrottle
             core = new ThrottlingCore();
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="ThrottlingHandler"/> class.
+        /// Presists the policy object in cache using <see cref="IPolicyRepository"/> implementation.
+        /// The policy object can be updated by <see cref="ThrottleManager"/> at runtime. 
+        /// </summary>
+        public ThrottlingHandler(ThrottlePolicy policy, IPolicyRepository policyRepository, IThrottleRepository repository, IThrottleLogger logger)
+        {
+            core = new ThrottlingCore();
+            core.Repository = repository;
+            Repository = repository;
+            Logger = logger;
+
+            QuotaExceededResponseCode = (HttpStatusCode)429;
+
+            this.policy = policy;
+            this.policyRepository = policyRepository;
+
+            if (policyRepository != null)
+            {
+                policyRepository.Save(ThrottleManager.GetPolicyKey(), policy);
+            }
+        }
+
         private IPolicyRepository policyRepository;
 
         /// <summary>

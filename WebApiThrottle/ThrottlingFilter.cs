@@ -18,7 +18,7 @@ namespace WebApiThrottle
         private ThrottlingCore core;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="ThrottlingHandler"/> class.
+        /// Creates a new instance of the <see cref="ThrottlingFilter"/> class.
         /// By default, the <see cref="QuotaExceededResponseCode"/> property 
         /// is set to 429 (Too Many Requests).
         /// </summary>
@@ -29,6 +29,11 @@ namespace WebApiThrottle
             core = new ThrottlingCore();
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="ThrottlingFilter"/> class.
+        /// Presists the policy object in cache using <see cref="IPolicyRepository"/> implementation.
+        /// The policy object can be updated by <see cref="ThrottleManager"/> at runtime. 
+        /// </summary>
         public ThrottlingFilter(ThrottlePolicy policy, IPolicyRepository policyRepository, IThrottleRepository repository, IThrottleLogger logger)
         {
             core = new ThrottlingCore();
