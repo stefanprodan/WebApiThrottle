@@ -52,8 +52,12 @@ namespace WebApiThrottle.Demo
                     //white list API keys that don’t require throttling
                     ClientWhitelist = new List<string> { "admin-key" },
 
-                    //Endpoint rate limits will be loaded from EnableThrottling attribute
-                    EndpointThrottling = true
+                    //scope to endpoints
+                    EndpointThrottling = true,
+                    EndpointRules = new Dictionary<string, RateLimits>
+                    { 
+                        { "api/search", new RateLimits { PerSecond = 10, PerMinute = 100, PerHour = 1000 } }
+                    }
                 },
                 policyRepository: new PolicyCacheRepository(),
                 repository: new CacheRepository(),
