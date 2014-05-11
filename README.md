@@ -154,7 +154,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 		EndpointThrottling = true,
 		EndpointRules = new Dictionary<string, RateLimits>
 		{ 
-			{ "api/search", new RateLimits { PerScond = 10, PerMinute = 100, PerHour = 1000 } }
+			{ "api/search", new RateLimits { PerSecond = 10, PerMinute = 100, PerHour = 1000 } }
 		}
 	},
 	Repository = new CacheRepository()
@@ -299,29 +299,25 @@ public static void Register(HttpConfiguration config)
         {
             //scope to IPs
             IpThrottling = true,
-            IpRules = new Dictionary<string, RateLimits>
-            { 
-                { "::1/10", new RateLimits { PerSecond = 2 } },
-                { "192.168.2.1", new RateLimits { PerMinute = 30, PerHour = 30*60, PerDay = 30*60*24 } }
-            },
-            //white list the "::1" IP to disable throttling on localhost for Win8
-            IpWhitelist = new List<string> { "127.0.0.1", "192.168.0.0/24" },
-
-            //scope to clients (if IP throttling is applied then the scope becomes a combination of IP and client key)
+            
+            //scope to clients
             ClientThrottling = true,
             ClientRules = new Dictionary<string, RateLimits>
             { 
                 { "api-client-key-1", new RateLimits { PerMinute = 60, PerHour = 600 } },
                 { "api-client-key-2", new RateLimits { PerDay = 5000 } }
             },
-            //white list API keys that don’t require throttling
-            ClientWhitelist = new List<string> { "admin-key" },
 
-            //Endpoint rate limits will be loaded from EnableThrottling attribute
+            //cope to endpoints
             EndpointThrottling = true
         },
+        
+        //replace with PolicyMemoryCacheRepository for Owin self-host
         policyRepository: new PolicyCacheRepository(),
+        
+        //replace with MemoryCacheRepository for Owin self-host
         repository: new CacheRepository(),
+        
         logger: new TracingThrottleLogger(traceWriter)));
 }
 
