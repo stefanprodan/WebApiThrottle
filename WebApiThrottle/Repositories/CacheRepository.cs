@@ -9,13 +9,22 @@ using System.Web.Caching;
 namespace WebApiThrottle
 {
     /// <summary>
-    /// Stors throttle metrics in asp.net cache
+    /// Stores throttle metrics in asp.net cache
     /// </summary>
     public class CacheRepository : IThrottleRepository
     {
         /// <summary>
         /// Insert or update
         /// </summary>
+        /// <param name="id">
+        /// The id.
+        /// </param>
+        /// <param name="throttleCounter">
+        /// The throttle Counter.
+        /// </param>
+        /// <param name="expirationTime">
+        /// The expiration Time.
+        /// </param>
         public void Save(string id, ThrottleCounter throttleCounter, TimeSpan expirationTime)
         {
             if (HttpContext.Current.Cache[id] != null)
@@ -55,8 +64,10 @@ namespace WebApiThrottle
             var cacheEnumerator = HttpContext.Current.Cache.GetEnumerator();
             while (cacheEnumerator.MoveNext())
             {
-                if (cacheEnumerator.Value.GetType() == typeof(ThrottleCounter))
+                if (cacheEnumerator.Value is ThrottleCounter)
+                {
                     HttpContext.Current.Cache.Remove(cacheEnumerator.Key.ToString());
+                }
             }
         }
     }

@@ -11,32 +11,77 @@ namespace WebApiThrottle
     /// </summary>
     public static class ThrottleManager
     {
-        /// <summary>
-        /// GLobal prefix
-        /// </summary>
-        public static string ApplicationName = "";
+        private static string applicationName = string.Empty;
+
+        private static string throttleKey = "throttle";
+
+        private static string policyKey = "throttle_policy";
 
         /// <summary>
-        /// Rate limits key prefix
+        /// Gets or sets the global prefix
         /// </summary>
-        public static string ThrottleKey = "throttle";
+        public static string ApplicationName
+        {
+            get
+            {
+                return applicationName;
+            }
+
+            set
+            {
+                applicationName = value;
+            }
+        }
 
         /// <summary>
-        /// Policy key suffix
+        /// Gets or sets the key prefix for rate limits
         /// </summary>
-        public static string PolicyKey = "throttle_policy";
+        public static string ThrottleKey
+        {
+            get
+            {
+                return throttleKey;
+            }
+
+            set
+            {
+                throttleKey = value;
+            }
+        }
 
         /// <summary>
-        /// Retuns key prefix for rate limits
+        /// Gets or sets the policy key suffix
         /// </summary>
+        public static string PolicyKey
+        {
+            get
+            {
+                return policyKey;
+            }
+
+            set
+            {
+                policyKey = value;
+            }
+        }
+
+        /// <summary>
+        /// Returns key prefix for rate limits
+        /// </summary>
+        /// <returns>
+        /// The throttle key.
+        /// </returns>
         public static string GetThrottleKey()
         {
             return ApplicationName + ThrottleKey;
         }
 
         /// <summary>
-        /// Retuns policy key (global prefix + policy key suffix)
+        /// Returns the policy key (global prefix + policy key suffix)
         /// </summary>
+        /// <returns>
+        /// The policy key.
+        /// </returns>
         public static string GetPolicyKey()
         {
             return ApplicationName + PolicyKey;
@@ -45,6 +90,12 @@ namespace WebApiThrottle
         /// <summary>
         /// Updates the policy object cached value
         /// </summary>
+        /// <param name="policy">
+        /// The policy.
+        /// </param>
+        /// <param name="cacheRepository">
+        /// The policy repository.
+        /// </param>
         public static void UpdatePolicy(ThrottlePolicy policy, IPolicyRepository cacheRepository)
         {
             cacheRepository.Save(GetPolicyKey(), policy);
@@ -53,6 +104,12 @@ namespace WebApiThrottle
         /// <summary>
         /// Reads the policy object from store and updates the cache
         /// </summary>
+        /// <param name="storeProvider">
+        /// The store provider.
+        /// </param>
+        /// <param name="cacheRepository">
+        /// The cache repository.
+        /// </param>
         public static void UpdatePolicy(IThrottlePolicyProvider storeProvider, IPolicyRepository cacheRepository)
         {
             var policy = ThrottlePolicy.FromStore(storeProvider);

@@ -15,6 +15,8 @@ namespace WebApiThrottle
     /// </summary>
     internal class ThrottlingCore
     {
+        private static readonly object ProcessLocker = new object();
+
         internal ThrottlePolicy Policy { get; set; }
 
         internal IThrottleRepository Repository { get; set; }
@@ -27,7 +29,10 @@ namespace WebApiThrottle
                 foreach (var rule in ipRules)
                 {
                     var range = new IPAddressRange(rule);
-                    if (range.Contains(ip)) return true;
+                    if (range.Contains(ip))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -135,16 +140,29 @@ namespace WebApiThrottle
         internal bool IsWhitelisted(RequestIdentity requestIdentity)
         {
             if (Policy.IpThrottling)
+            {
                 if (Policy.IpWhitelist != null && ContainsIp(Policy.IpWhitelist, requestIdentity.ClientIp))
+                {
                     return true;
+                }
+            }
 
             if (Policy.ClientThrottling)
+            {
                 if (Policy.ClientWhitelist != null && Policy.ClientWhitelist.Contains(requestIdentity.ClientKey))
+                {
                     return true;
+                }
+            }
 
             if (Policy.EndpointThrottling)
-                if (Policy.EndpointWhitelist != null && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x.ToLowerInvariant())))
+            {
+                if (Policy.EndpointWhitelist != null
+                    && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x.ToLowerInvariant())))
+                {
                     return true;
+                }
+            }
 
             return false;
         }
@@ -157,34 +175,59 @@ namespace WebApiThrottle
                 };
 
             if (Policy.IpThrottling)
+            {
                 keyValues.Add(requestIdentity.ClientIp);
+            }
 
             if (Policy.ClientThrottling)
+            {
                 keyValues.Add(requestIdentity.ClientKey);
+            }
 
             if (Policy.EndpointThrottling)
+            {
                 keyValues.Add(requestIdentity.Endpoint);
+            }
 
             keyValues.Add(period.ToString());
 
             var id = string.Join("_", keyValues);
             var idBytes = Encoding.UTF8.GetBytes(id);
             var hashBytes = new System.Security.Cryptography.SHA1Managed().ComputeHash(idBytes);
-            var hex = BitConverter.ToString(hashBytes).Replace("-", "");
+            var hex = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
             return hex;
         }
 
         internal List<KeyValuePair<RateLimitPeriod, long>> RatesWithDefaults(List<KeyValuePair<RateLimitPeriod, long>> defRates)
         {
-            if (!defRates.Any(x => x.Key == RateLimitPeriod.Second)) defRates.Insert(0, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Second, 0));
-            if (!defRates.Any(x => x.Key == RateLimitPeriod.Minute)) defRates.Insert(1, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Minute, 0));
-            if (!defRates.Any(x => x.Key == RateLimitPeriod.Hour)) defRates.Insert(2, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Hour, 0));
-            if (!defRates.Any(x => x.Key == RateLimitPeriod.Day)) defRates.Insert(3, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Day, 0));
-            if (!defRates.Any(x => x.Key == RateLimitPeriod.Week)) defRates.Insert(4, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Week, 0));
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Second))
+            {
+                defRates.Insert(0, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Second, 0));
+            }
+
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Minute))
+            {
+                defRates.Insert(1, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Minute, 0));
+            }
+
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Hour))
+            {
+                defRates.Insert(2, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Hour, 0));
+            }
+
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Day))
+            {
+                defRates.Insert(3, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Day, 0));
+            }
+
+            if (!defRates.Any(x => x.Key == RateLimitPeriod.Week))
+            {
+                defRates.Insert(4, new KeyValuePair<RateLimitPeriod, long>(RateLimitPeriod.Week, 0));
+            }
+
             return defRates;
         }
 
-        static readonly object _processLocker = new object();
         internal ThrottleCounter ProcessRequest(RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, out string id)
         {
             var throttleCounter = new ThrottleCounter()
@@ -195,29 +238,28 @@ namespace WebApiThrottle
 
             id = ComputeThrottleKey(requestIdentity, period);
 
-            //serial reads and writes
-            lock (_processLocker)
+            // serial reads and writes
+            lock (ProcessLocker)
             {
                 var entry = Repository.FirstOrDefault(id);
                 if (entry.HasValue)
                 {
-                    //entry has not expired
+                    // entry has not expired
                     if (entry.Value.Timestamp + timeSpan >= DateTime.UtcNow)
                     {
-                        //increment request count
+                        // increment request count
                         var totalRequests = entry.Value.TotalRequests + 1;
 
-                        //deep copy
+                        // deep copy
                         throttleCounter = new ThrottleCounter
                         {
                             Timestamp = entry.Value.Timestamp,
                             TotalRequests = totalRequests
                         };
-
                     }
                 }
 
-                //stores: id (string) - timestamp (datetime) - total (long)
+                // stores: id (string) - timestamp (datetime) - total (long)
                 Repository.Save(id, throttleCounter, timeSpan);
             }
 
@@ -252,13 +294,13 @@ namespace WebApiThrottle
 
         internal void ApplyRules(RequestIdentity identity, TimeSpan timeSpan, RateLimitPeriod rateLimitPeriod, ref long rateLimit)
         {
-            //apply endpoint rate limits
+            // apply endpoint rate limits
             if (Policy.EndpointRules != null)
             {
                 var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key.ToLowerInvariant())).ToList();
                 if (rules.Any())
                 {
-                    //get the lower limit from all applying rules
+                    // get the lower limit from all applying rules
                     var customRate = (from r in rules let rateValue = r.Value.GetLimit(rateLimitPeriod) select rateValue).Min();
 
                     if (customRate > 0)
@@ -268,19 +310,25 @@ namespace WebApiThrottle
                 }
             }
 
-            //apply custom rate limit for clients that will override endpoint limits
+            // apply custom rate limit for clients that will override endpoint limits
             if (Policy.ClientRules != null && Policy.ClientRules.Keys.Contains(identity.ClientKey))
             {
                 var limit = Policy.ClientRules[identity.ClientKey].GetLimit(rateLimitPeriod);
-                if (limit > 0) rateLimit = limit;
+                if (limit > 0)
+                {
+                    rateLimit = limit;
+                }
             }
 
-            //enforce ip rate limit as is most specific 
+            // enforce ip rate limit as is most specific 
             string ipRule = null;
             if (Policy.IpRules != null && ContainsIp(Policy.IpRules.Keys.ToList(), identity.ClientIp, out ipRule))
             {
                 var limit = Policy.IpRules[ipRule].GetLimit(rateLimitPeriod);
-                if (limit > 0) rateLimit = limit;
+                if (limit > 0)
+                {
+                    rateLimit = limit;
+                }
             }
         }
     }

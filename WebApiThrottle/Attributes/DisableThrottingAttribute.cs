@@ -9,6 +9,5 @@ namespace WebApiThrottle
 {
     public class DisableThrottingAttribute : ActionFilterAttribute, IActionFilter
     {
-
     }
 }

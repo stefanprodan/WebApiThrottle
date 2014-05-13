@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace WebApiThrottle
 {
     /// <summary>
-    /// Stors policy in runtime cache, intented for owin self host.
+    /// Stores policy in runtime cache, intended for OWIN self host.
     /// </summary>
     public class PolicyMemoryCacheRepository : IPolicyRepository
     {
-        ObjectCache memCache = MemoryCache.Default;
+        private ObjectCache memCache = MemoryCache.Default;
 
         public void Save(string id, ThrottlePolicy policy)
         {
@@ -24,10 +24,8 @@ namespace WebApiThrottle
             {
                 memCache.Add(
                     id,
-                    policy, new CacheItemPolicy()
-                    {
-
-                    });
+                    policy, 
+                    new CacheItemPolicy());
             }
         }
 

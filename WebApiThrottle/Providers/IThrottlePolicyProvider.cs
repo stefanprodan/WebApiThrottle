@@ -12,7 +12,9 @@ namespace WebApiThrottle
     public interface IThrottlePolicyProvider
     {
         ThrottlePolicySettings ReadSettings();
+
         IEnumerable<ThrottlePolicyRule> AllRules();
+
         IEnumerable<ThrottlePolicyWhitelist> AllWhitelists();
     }
 }

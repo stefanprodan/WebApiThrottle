@@ -8,18 +8,10 @@ using System.Threading.Tasks;
 namespace WebApiThrottle
 {
     /// <summary>
-    /// Stors throttle metrics in a thread safe dictionary, has no clean-up mechanism, expired counters are deleted on renewal
+    /// Stores throttle metrics in a thread safe dictionary, has no clean-up mechanism, expired counters are deleted on renewal
     /// </summary>
     public class ConcurrentDictionaryRepository : IThrottleRepository
     {
-        [Serializable]
-        internal struct ThrottleCounterWrapper
-        {
-            public DateTime Timestamp { get; set; }
-            public long TotalRequests { get; set; }
-            public TimeSpan ExpirationTime { get; set; }
-        }
-
         private static ConcurrentDictionary<string, ThrottleCounterWrapper> cache = new ConcurrentDictionary<string, ThrottleCounterWrapper>();
 
         public bool Any(string id)
@@ -30,13 +22,19 @@ namespace WebApiThrottle
         /// <summary>
         /// Insert or update
         /// </summary>
+        /// <param name="id">
+        /// The id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="ThrottleCounter"/>.
+        /// </returns>
         public ThrottleCounter? FirstOrDefault(string id)
         {
             var entry = new ThrottleCounterWrapper();
 
             if (cache.TryGetValue(id, out entry))
             {
-                //remove expired entry
+                // remove expired entry
                 if (entry.Timestamp + entry.ExpirationTime < DateTime.UtcNow)
                 {
                     cache.TryRemove(id, out entry);
@@ -72,6 +70,16 @@ namespace WebApiThrottle
         public void Clear()
         {
             cache.Clear();
+        }
+
+        [Serializable]
+        internal struct ThrottleCounterWrapper
+        {
+            public DateTime Timestamp { get; set; }
+
+            public long TotalRequests { get; set; }
+
+            public TimeSpan ExpirationTime { get; set; }
         }
     }
 }

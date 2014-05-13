@@ -13,6 +13,7 @@ namespace WebApiThrottle
     public struct ThrottleCounter
     {
         public DateTime Timestamp { get; set; }
+
         public long TotalRequests { get; set; }
     }
 }

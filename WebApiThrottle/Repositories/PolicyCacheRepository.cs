@@ -9,7 +9,7 @@ using System.Web.Caching;
 namespace WebApiThrottle
 {
     /// <summary>
-    /// Stors policy in asp.net cache
+    /// Stores policy in asp.net cache
     /// </summary>
     public class PolicyCacheRepository : IPolicyRepository
     {

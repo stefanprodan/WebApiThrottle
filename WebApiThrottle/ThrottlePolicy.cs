@@ -13,45 +13,71 @@ namespace WebApiThrottle
     public class ThrottlePolicy
     {
         /// <summary>
-        /// Enables IP throttling
-        /// </summary>
-        public bool IpThrottling { get; set; }
-        public List<string> IpWhitelist { get; set; }
-        public Dictionary<string, RateLimits> IpRules { get; set; }
-
-        /// <summary>
-        /// Enables Cient Key throttling
-        /// </summary>
-        public bool ClientThrottling { get; set; }
-        public List<string> ClientWhitelist { get; set; }
-        public Dictionary<string, RateLimits> ClientRules { get; set; }
-
-        /// <summary>
-        /// Enables routes throttling
-        /// </summary>
-        public bool EndpointThrottling { get; set; }
-        public List<string> EndpointWhitelist { get; set; }
-        public Dictionary<string, RateLimits> EndpointRules { get; set; }
-
-        /// <summary>
-        /// All requests including the rejected ones will stack in this order: day, hour, min, sec
-        /// </summary>
-        public bool StackBlockedRequests { get; set; }
-
-        internal Dictionary<RateLimitPeriod, long> Rates { get; set; }
-
-        /// <summary>
         /// Configure default request limits per second, minute, hour or day
         /// </summary>
         public ThrottlePolicy(long? perSecond = null, long? perMinute = null, long? perHour = null, long? perDay = null, long? perWeek = null)
         {
             Rates = new Dictionary<RateLimitPeriod, long>();
-            if (perSecond.HasValue) Rates.Add(RateLimitPeriod.Second, perSecond.Value);
-            if (perMinute.HasValue) Rates.Add(RateLimitPeriod.Minute, perMinute.Value);
-            if (perHour.HasValue) Rates.Add(RateLimitPeriod.Hour, perHour.Value);
-            if (perDay.HasValue) Rates.Add(RateLimitPeriod.Day, perDay.Value);
-            if (perWeek.HasValue) Rates.Add(RateLimitPeriod.Week, perWeek.Value);
+            if (perSecond.HasValue)
+            {
+                Rates.Add(RateLimitPeriod.Second, perSecond.Value);
+            }
+
+            if (perMinute.HasValue)
+            {
+                Rates.Add(RateLimitPeriod.Minute, perMinute.Value);
+            }
+
+
+            if (perHour.HasValue)
+            {
+                Rates.Add(RateLimitPeriod.Hour, perHour.Value);
+            }
+
+
+            if (perDay.HasValue)
+            {
+                Rates.Add(RateLimitPeriod.Day, perDay.Value);
+            }
+            if (perWeek.HasValue)
+            {
+                Rates.Add(RateLimitPeriod.Week, perWeek.Value);
+            }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether IP throttling is enabled.
+        /// </summary>
+        public bool IpThrottling { get; set; }
+
+        public List<string> IpWhitelist { get; set; }
+
+        public Dictionary<string, RateLimits> IpRules { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether client key throttling is enabled.
+        /// </summary>
+        public bool ClientThrottling { get; set; }
+
+        public List<string> ClientWhitelist { get; set; }
+
+        public Dictionary<string, RateLimits> ClientRules { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether route throttling is enabled
+        /// </summary>
+        public bool EndpointThrottling { get; set; }
+
+        public List<string> EndpointWhitelist { get; set; }
+
+        public Dictionary<string, RateLimits> EndpointRules { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether all requests, including the rejected ones, should be stacked in this order: day, hour, min, sec
+        /// </summary>
+        public bool StackBlockedRequests { get; set; }
+
+        internal Dictionary<RateLimitPeriod, long> Rates { get; set; }
 
         public static ThrottlePolicy FromStore(IThrottlePolicyProvider provider)
         {
@@ -59,7 +85,8 @@ namespace WebApiThrottle
             var whitelists = provider.AllWhitelists();
             var rules = provider.AllRules();
 
-            var policy = new ThrottlePolicy(perSecond: settings.LimitPerSecond,
+            var policy = new ThrottlePolicy(
+                perSecond: settings.LimitPerSecond,
                perMinute: settings.LimitPerMinute,
                perHour: settings.LimitPerHour,
                perDay: settings.LimitPerDay,
