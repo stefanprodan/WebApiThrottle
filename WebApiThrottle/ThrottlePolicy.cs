@@ -103,7 +103,14 @@ namespace WebApiThrottle
 
             foreach (var item in rules)
             {
-                var rateLimit = new RateLimits { PerSecond = item.LimitPerSecond, PerMinute = item.LimitPerMinute, PerHour = item.LimitPerHour, PerDay = item.LimitPerDay, PerWeek = item.LimitPerWeek };
+                var rateLimit = new RateLimits
+                                    {
+                                        PerSecond = item.LimitPerSecond,
+                                        PerMinute = item.LimitPerMinute,
+                                        PerHour = item.LimitPerHour,
+                                        PerDay = item.LimitPerDay,
+                                        PerWeek = item.LimitPerWeek
+                                    };
 
                 switch (item.PolicyType)
                 {

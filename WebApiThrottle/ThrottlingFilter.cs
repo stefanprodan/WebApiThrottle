@@ -167,7 +167,9 @@ namespace WebApiThrottle
 
                             // check if key expired
                             if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
+                            {
                                 continue;
+                            }
 
                             // check if limit is reached
                             if (throttleCounter.TotalRequests > rateLimit)
