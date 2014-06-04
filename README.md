@@ -244,9 +244,9 @@ If your API key is stored differently, you can override the <code>ThrottlingHand
 ``` cs
 public class CustomThrottlingHandler : ThrottlingHandler
 {
-	protected override RequestIndentity SetIndentity(HttpRequestMessage request)
+	protected override RequestIdentity SetIndentity(HttpRequestMessage request)
 	{
-		return new RequestIndentity()
+		return new RequestIdentity()
 		{
 			ClientKey = request.Headers.GetValues("Authorization-Key").First(),
 			ClientIp = base.GetClientIp(request).ToString(),
