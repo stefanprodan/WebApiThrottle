@@ -24,7 +24,7 @@ namespace WebApiThrottler.SelfHostOwinDemo
             );
 
             //middleware with policy loaded from app.config
-            appBuilder.Use(typeof(ThrottingMiddleware),
+            appBuilder.Use(typeof(ThrottlingMiddleware),
                 ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
                 new PolicyMemoryCacheRepository(),
                 new MemoryCacheRepository(),

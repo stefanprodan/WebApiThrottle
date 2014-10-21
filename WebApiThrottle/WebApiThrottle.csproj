@@ -88,7 +88,7 @@
     <Compile Include="Models\ThrottleCounter.cs" />
     <Compile Include="Logging\ThrottleLogEntry.cs" />
     <Compile Include="Attributes\EnableThrottlingAttribute.cs" />
-    <Compile Include="ThrottingMiddleware.cs" />
+    <Compile Include="ThrottlingMiddleware.cs" />
     <Compile Include="ThrottleManager.cs" />
     <Compile Include="ThrottlePolicy.cs" />
     <Compile Include="Repositories\CacheRepository.cs" />

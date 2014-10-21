@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 
 namespace WebApiThrottle
 {
-    public class ThrottingMiddleware : OwinMiddleware
+    public class ThrottlingMiddleware : OwinMiddleware
     {
         private ThrottlingCore core;
         private IPolicyRepository policyRepository;
         private ThrottlePolicy policy;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ThrottingMiddleware"/> class. 
+        /// Initializes a new instance of the <see cref="ThrottlingMiddleware"/> class. 
         /// By default, the <see cref="QuotaExceededResponseCode"/> property 
         /// is set to 429 (Too Many Requests).
         /// </summary>
-        public ThrottingMiddleware(OwinMiddleware next)
+        public ThrottlingMiddleware(OwinMiddleware next)
             : base(next)
         {
             QuotaExceededResponseCode = (HttpStatusCode)429;
@@ -29,7 +29,7 @@ namespace WebApiThrottle
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ThrottingMiddleware"/> class.
+        /// Initializes a new instance of the <see cref="ThrottlingMiddleware"/> class.
         /// Persists the policy object in cache using <see cref="IPolicyRepository"/> implementation.
         /// The policy object can be updated by <see cref="ThrottleManager"/> at runtime. 
         /// </summary>
@@ -45,7 +45,7 @@ namespace WebApiThrottle
         /// <param name="logger">
         /// The logger.
         /// </param>
-        public ThrottingMiddleware(OwinMiddleware next, ThrottlePolicy policy, IPolicyRepository policyRepository, IThrottleRepository repository, IThrottleLogger logger)
+        public ThrottlingMiddleware(OwinMiddleware next, ThrottlePolicy policy, IPolicyRepository policyRepository, IThrottleRepository repository, IThrottleLogger logger)
             : base(next)
         {
             core = new ThrottlingCore();
