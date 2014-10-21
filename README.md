@@ -498,3 +498,23 @@ public class Startup
 }
 ```
 
+IIS hosted configuration example:
+
+``` cs
+public class Startup
+{
+    public void Configuration(IAppBuilder appBuilder)
+    {
+        ...
+
+	//throtting middleware with policy loaded from web.config
+	appBuilder.Use(typeof(ThrottlingMiddleware),
+	    ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+	    new PolicyCacheRepository(),
+	    new CacheRepository(),
+	    null);
+
+        ...
+    }
+}
+```
