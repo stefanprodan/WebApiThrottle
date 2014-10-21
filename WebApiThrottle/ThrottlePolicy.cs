@@ -100,6 +100,7 @@ namespace WebApiThrottle
             policy.IpRules = new Dictionary<string, RateLimits>();
             policy.ClientRules = new Dictionary<string, RateLimits>();
             policy.EndpointRules = new Dictionary<string, RateLimits>();
+            policy.EndpointWhitelist = new List<string>();
 
             foreach (var item in rules)
             {
@@ -126,6 +127,10 @@ namespace WebApiThrottle
                 }
             }
 
+            if (whitelists != null)
+            {
+                policy.EndpointWhitelist.AddRange(whitelists.Select(x => x.Entry));
+            }
             return policy;
         }
     }
