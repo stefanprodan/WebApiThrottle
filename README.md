@@ -473,9 +473,9 @@ public class ValuesController : ApiController
 }
 ```
 
-### Rate limiting with ThrottingMiddleware
+### Rate limiting with ThrottlingMiddleware
 
-ThrottingMiddleware is an OWIN middleware component that works the same as the ThrottlingHandler. With the ThrottingMiddleware you can target endpoints outside of the WebAPI area, like OAuth middleware or SignalR endpoints.
+ThrottlingMiddleware is an OWIN middleware component that works the same as the ThrottlingHandler. With the ThrottlingMiddleware you can target endpoints outside of the WebAPI area, like OAuth middleware or SignalR endpoints.
 
 Self-hosted configuration example:
 
@@ -487,7 +487,7 @@ public class Startup
         ...
 
         //throtting middleware with policy loaded from app.config
-        appBuilder.Use(typeof(ThrottingMiddleware),
+        appBuilder.Use(typeof(ThrottlingMiddleware),
             ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
             new PolicyMemoryCacheRepository(),
             new MemoryCacheRepository(),
