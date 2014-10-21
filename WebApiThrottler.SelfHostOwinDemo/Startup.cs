@@ -23,12 +23,19 @@ namespace WebApiThrottler.SelfHostOwinDemo
                 defaults: new { id = RouteParameter.Optional }
             );
 
+            //middleware with policy loaded from app.config
+            appBuilder.Use(typeof(ThrottingMiddleware),
+                ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+                new PolicyMemoryCacheRepository(),
+                new MemoryCacheRepository(),
+                null);
+
             //Web API throttling load policy from app.config
-            config.MessageHandlers.Add(new ThrottlingHandler()
-            {
-                Policy = ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
-                Repository = new MemoryCacheRepository()
-            });
+            //config.MessageHandlers.Add(new ThrottlingHandler()
+            //{
+            //    Policy = ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+            //    Repository = new MemoryCacheRepository()
+            //});
 
             //Web API throttling hardcoded policy
             //config.MessageHandlers.Add(new ThrottlingHandler()
