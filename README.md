@@ -1,7 +1,7 @@
 WebApiThrottle
 ==============
 
-ASP.NET Web API Throttling handler and filter are designed to control the rate of requests that clients 
+ASP.NET Web API Throttling handler, OWIN middleware and filter are designed to control the rate of requests that clients 
 can make to a Web API based on IP address, client API key and request route. 
 WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrottle](https://www.nuget.org/packages/WebApiThrottle/).
 
@@ -472,3 +472,29 @@ public class ValuesController : ApiController
     }
 }
 ```
+
+### Rate limiting with ThrottlingMiddleware
+
+ThrottlingMiddleware is an OWIN middleware component that works the same as the ThrottlingHandler. With the ThrottlingMiddleware you can target endpoints outside of the WebAPI area, like OAuth middleware or SignalR endpoints.
+
+Self-hosted configuration example:
+
+``` cs
+public class Startup
+{
+    public void Configuration(IAppBuilder appBuilder)
+    {
+        ...
+
+        //throtting middleware with policy loaded from app.config
+        appBuilder.Use(typeof(ThrottlingMiddleware),
+            ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+            new PolicyMemoryCacheRepository(),
+            new MemoryCacheRepository(),
+            null);
+
+        ...
+    }
+}
+```
+
