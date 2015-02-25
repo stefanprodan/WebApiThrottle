@@ -129,7 +129,9 @@ namespace WebApiThrottle
 
             if (whitelists != null)
             {
-                policy.EndpointWhitelist.AddRange(whitelists.Select(x => x.Entry));
+                policy.IpWhitelist.AddRange(whitelists.Where(x => x.PolicyType == ThrottlePolicyType.IpThrottling).Select(x => x.Entry));
+                policy.ClientWhitelist.AddRange(whitelists.Where(x => x.PolicyType == ThrottlePolicyType.ClientThrottling).Select(x => x.Entry));
+                policy.EndpointWhitelist.AddRange(whitelists.Where(x => x.PolicyType == ThrottlePolicyType.EndpointThrottling).Select(x => x.Entry));
             }
             return policy;
         }
