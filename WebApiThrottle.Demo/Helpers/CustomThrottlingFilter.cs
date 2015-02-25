@@ -20,7 +20,7 @@ namespace WebApiThrottle.Demo.Helpers
             {
                 ClientKey = request.Headers.Contains("Authorization-Key") ? request.Headers.GetValues("Authorization-Key").First() : "anon",
                 ClientIp = base.GetClientIp(request).ToString(),
-                Endpoint = request.RequestUri.AbsolutePath
+                Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant()
             };
         }
 
