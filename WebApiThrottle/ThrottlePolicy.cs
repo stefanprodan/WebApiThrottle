@@ -101,6 +101,8 @@ namespace WebApiThrottle
             policy.ClientRules = new Dictionary<string, RateLimits>();
             policy.EndpointRules = new Dictionary<string, RateLimits>();
             policy.EndpointWhitelist = new List<string>();
+            policy.IpWhitelist = new List<string>();
+            policy.ClientWhitelist = new List<string>();
 
             foreach (var item in rules)
             {

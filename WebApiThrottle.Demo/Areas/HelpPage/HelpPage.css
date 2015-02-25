@@ -65,7 +65,7 @@
 
 .help-page .sample-header {
     border: 2px solid #D4D4D4;
-    background: #76B8DB;
+    background: #00497E;
     color: #FFFFFF;
     padding: 8px 15px;
     border-bottom: none;
@@ -109,6 +109,7 @@
 .help-page h1,
 .help-page .h1 {
     font-size: 36px;
+    line-height: normal;
 }
 
 .help-page h2,
@@ -128,6 +129,6 @@
 }
 
 .help-page a {
-    color: #00abec;
+    color: #0000EE;
     text-decoration: none;
 }
