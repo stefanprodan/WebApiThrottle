@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>1.2.0</version>
+    <version>1.4.0</version>
     <authors>Stefan Prodan</authors>
     <owners>Stefan Prodan</owners>
     <id>WebApiThrottle</id>
     <title>ASP.NET Web API Rate Limiter</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>WebApiThrottle message handler and action filter are designed for controlling the rate of requests that clients can make to an API based on IP address, client API key and request route. WebApiThrottle works with ASP.NET Web API hosted is IIS, Owin with IIS and Owin self-hosted.</description>
-    <copyright>Stefan Prodan 2013-2014</copyright>
+    <copyright>Stefan Prodan 2013-2015</copyright>
     <tags>ASP.NET Web API, Owin, throttling, rate limits</tags>
     <projectUrl>https://github.com/stefanprodan/WebApiThrottle</projectUrl>
     <language>en-US</language>
     <dependencies>
-      <dependency id="Microsoft.AspNet.WebApi" version="5.0.0" />
-      <dependency id="Newtonsoft.Json" version="4.5.11" />
-      <dependency id="Microsoft.Owin" version="2.0.0" />
+      <dependency id="Microsoft.AspNet.WebApi.Core" version="5.2.3" />
+      <dependency id="Microsoft.Owin" version="3.0.1" />
+      <dependency id="Newtonsoft.Json" version="6.0.8" />
     </dependencies>
   </metadata>
   <files>
