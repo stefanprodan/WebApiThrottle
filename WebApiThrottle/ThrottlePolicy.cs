@@ -12,10 +12,22 @@ namespace WebApiThrottle
     [Serializable]
     public class ThrottlePolicy
     {
+        public ThrottlePolicy()
+        {
+            IpWhitelist = new List<string>();
+            IpRules = new Dictionary<string, RateLimits>();
+            ClientWhitelist = new List<string>();
+            ClientRules = new Dictionary<string, RateLimits>();
+            EndpointWhitelist = new List<string>();
+            EndpointRules = new Dictionary<string, RateLimits>();
+            Rates = new Dictionary<RateLimitPeriod, long>();
+        }
+
         /// <summary>
         /// Configure default request limits per second, minute, hour or day
         /// </summary>
         public ThrottlePolicy(long? perSecond = null, long? perMinute = null, long? perHour = null, long? perDay = null, long? perWeek = null)
+            : this()
         {
             Rates = new Dictionary<RateLimitPeriod, long>();
             if (perSecond.HasValue)
