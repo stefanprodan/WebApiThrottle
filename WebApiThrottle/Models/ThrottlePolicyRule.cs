@@ -20,6 +20,7 @@ namespace WebApiThrottle
         public long LimitPerWeek { get; set; }
 
         public string Entry { get; set; }
+        public string HttpMethod { get; set; }
 
         public ThrottlePolicyType PolicyType { get; set; }
     }

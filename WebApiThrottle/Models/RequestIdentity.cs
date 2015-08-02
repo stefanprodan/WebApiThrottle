@@ -17,5 +17,15 @@ namespace WebApiThrottle
         public string ClientKey { get; set; }
 
         public string Endpoint { get; set; }
+
+        public string HttpMethod { get; set; }
+
+        public string EndpointWithMethod
+        {
+            get
+            {
+                return string.Format("{0}{1}", HttpMethod, Endpoint).ToLowerInvariant();
+            }
+        }
     }
 }

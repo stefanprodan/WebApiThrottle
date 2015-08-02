@@ -186,7 +186,7 @@ namespace WebApiThrottle
 
             if (Policy.EndpointThrottling)
             {
-                keyValues.Add(requestIdentity.Endpoint);
+                keyValues.Add(requestIdentity.EndpointWithMethod);
             }
 
             keyValues.Add(period.ToString());
@@ -297,7 +297,8 @@ namespace WebApiThrottle
             // apply endpoint rate limits
             if (Policy.EndpointRules != null)
             {
-                var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key.ToLowerInvariant())).ToList();
+                
+                var rules = Policy.EndpointRules.Where(x => identity.EndpointWithMethod.Contains(x.Key.ToLowerInvariant())).ToList();
                 if (rules.Any())
                 {
                     // get the lower limit from all applying rules

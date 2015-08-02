@@ -116,7 +116,7 @@ namespace WebApiThrottle
             var applyThrottling = ApplyThrottling(actionContext, out attrPolicy);
 
             // get policy from repo
-            if(policyRepository != null)
+            if (policyRepository != null)
             {
                 policy = policyRepository.FirstOrDefault(ThrottleManager.GetPolicyKey());
             }
@@ -180,8 +180,8 @@ namespace WebApiThrottle
                                     Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, actionContext.Request));
                                 }
 
-                                var message = !string.IsNullOrEmpty(this.QuotaExceededMessage) 
-                                    ? this.QuotaExceededMessage 
+                                var message = !string.IsNullOrEmpty(this.QuotaExceededMessage)
+                                    ? this.QuotaExceededMessage
                                     : "API calls quota exceeded! maximum admitted {0} per {1}.";
 
                                 // add status code and retry after x seconds to response
@@ -205,7 +205,7 @@ namespace WebApiThrottle
             entry.ClientIp = core.GetClientIp(request).ToString();
             entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
             entry.ClientKey = request.Headers.Contains("Authorization-Token") ? request.Headers.GetValues("Authorization-Token").First() : "anon";
-
+            entry.HttpMethod = request.Method.Method;
             return entry;
         }
 

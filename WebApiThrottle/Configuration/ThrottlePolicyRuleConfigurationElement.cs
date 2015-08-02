@@ -68,6 +68,23 @@ namespace WebApiThrottle
             }
         }
 
+        [ConfigurationProperty("httpmethod", IsRequired = false, DefaultValue = "*")]
+        public string HttpMethod
+        {
+            get
+            {
+                var method = (this["httpmethod"] as string) ?? string.Empty;
+                if (method == "*")
+                {
+                    return string.Empty;
+                }
+                else
+                {
+                    return method;
+                }
+            }
+        }
+
         [ConfigurationProperty("policyType", IsRequired = true)]
         public int PolicyType
         {
