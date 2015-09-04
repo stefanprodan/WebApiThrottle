@@ -58,6 +58,11 @@ namespace WebApiThrottle
         }
 
         /// <summary>
+        /// ThrottleBy will limit the check to a single measure enabling X-Rate-Limit-* Headers
+        /// </summary>
+        public RateLimitPeriod? ThrotthleBy { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether IP throttling is enabled.
         /// </summary>
         public bool IpThrottling { get; set; }

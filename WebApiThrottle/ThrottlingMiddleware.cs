@@ -146,7 +146,7 @@ namespace WebApiThrottle
             }
 
             // apply policy
-            foreach (var rate in defRates)
+            foreach (var rate in (Policy.ThrotthleBy.HasValue ? defRates.Where(j => j.Key == Policy.ThrotthleBy.Value) : defRates))
             {
                 var rateLimitPeriod = rate.Key;
                 var rateLimit = rate.Value;
@@ -191,6 +191,19 @@ namespace WebApiThrottle
                         }, response);
 
                         return;
+                    }
+                    else
+                    {
+                        if (Policy.ThrotthleBy.HasValue)
+                        {
+                            response.OnSendingHeaders(state =>
+                            {
+                                var resp = (OwinResponse)state;
+                                resp.Headers.Add("X-Rate-Limit-Limit", new string[] { rateLimit.ToString() });
+                                resp.Headers.Add("X-Rate-Limit-Remaining", new string[] { (rateLimit - throttleCounter.TotalRequests).ToString() });
+                                resp.Headers.Add("X-Rate-Limit-Reset", new string[] { core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod) });
+                            }, response);
+                        }
                     }
                 }
             }

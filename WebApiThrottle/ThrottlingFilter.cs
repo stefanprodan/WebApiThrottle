@@ -142,7 +142,7 @@ namespace WebApiThrottle
                     }
 
                     // apply policy
-                    foreach (var rate in defRates)
+                    foreach (var rate in (Policy.ThrotthleBy.HasValue ? defRates.Where(j => j.Key == Policy.ThrotthleBy.Value) : defRates))
                     {
                         var rateLimitPeriod = rate.Key;
                         var rateLimit = rate.Value;
@@ -190,6 +190,15 @@ namespace WebApiThrottle
                                     string.Format(message, rateLimit, rateLimitPeriod),
                                     QuotaExceededResponseCode,
                                     core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
+                            }
+                            else
+                            {
+                                if (Policy.ThrotthleBy.HasValue)
+                                {
+                                    actionContext.Response.Headers.Add("X-Rate-Limit-Limit", rateLimit.ToString());
+                                    actionContext.Response.Headers.Add("X-Rate-Limit-Remaining", (rateLimit - throttleCounter.TotalRequests).ToString());
+                                    actionContext.Response.Headers.Add("X-Rate-Limit-Reset", core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
+                                }
                             }
                         }
                     }
