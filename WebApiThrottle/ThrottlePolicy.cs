@@ -64,7 +64,7 @@ namespace WebApiThrottle
 
         public List<string> IpWhitelist { get; set; }
 
-        public Dictionary<string, RateLimits> IpRules { get; set; }
+        public IDictionary<string, RateLimits> IpRules { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether client key throttling is enabled.
@@ -73,7 +73,7 @@ namespace WebApiThrottle
 
         public List<string> ClientWhitelist { get; set; }
 
-        public Dictionary<string, RateLimits> ClientRules { get; set; }
+        public IDictionary<string, RateLimits> ClientRules { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether route throttling is enabled
@@ -82,7 +82,7 @@ namespace WebApiThrottle
 
         public List<string> EndpointWhitelist { get; set; }
 
-        public Dictionary<string, RateLimits> EndpointRules { get; set; }
+        public IDictionary<string, RateLimits> EndpointRules { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether all requests, including the rejected ones, should be stacked in this order: day, hour, min, sec
