@@ -193,7 +193,14 @@ namespace WebApiThrottle
 
             var id = string.Join("_", keyValues);
             var idBytes = Encoding.UTF8.GetBytes(id);
-            var hashBytes = new System.Security.Cryptography.SHA1Managed().ComputeHash(idBytes);
+
+            byte[] hashBytes;
+
+            using (var algorithm = System.Security.Cryptography.HashAlgorithm.Create("SHA1"))
+            {
+                hashBytes = algorithm.ComputeHash(idBytes);
+            }
+            
             var hex = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
             return hex;
         }
