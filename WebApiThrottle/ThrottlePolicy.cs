@@ -116,16 +116,18 @@ namespace WebApiThrottle
             policy.IpWhitelist = new List<string>();
             policy.ClientWhitelist = new List<string>();
 
+            //Set default EndpointRules httpmethod "get"
+            var defaultEndpoint = "{0}/{1}";
             foreach (var item in rules)
             {
                 var rateLimit = new RateLimits
-                                    {
-                                        PerSecond = item.LimitPerSecond,
-                                        PerMinute = item.LimitPerMinute,
-                                        PerHour = item.LimitPerHour,
-                                        PerDay = item.LimitPerDay,
-                                        PerWeek = item.LimitPerWeek
-                                    };
+                {
+                    PerSecond = item.LimitPerSecond,
+                    PerMinute = item.LimitPerMinute,
+                    PerHour = item.LimitPerHour,
+                    PerDay = item.LimitPerDay,
+                    PerWeek = item.LimitPerWeek
+                };
 
                 switch (item.PolicyType)
                 {
@@ -136,7 +138,7 @@ namespace WebApiThrottle
                         policy.ClientRules.Add(item.Entry, rateLimit);
                         break;
                     case ThrottlePolicyType.EndpointThrottling:
-                        policy.EndpointRules.Add(item.Entry, rateLimit);
+                        policy.EndpointRules.Add(string.Format(defaultEndpoint, item.HttpMethod, item.Entry), rateLimit);
                         break;
                 }
             }

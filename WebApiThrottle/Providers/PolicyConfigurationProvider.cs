@@ -44,6 +44,7 @@ namespace WebApiThrottle
                     rules.Add(new ThrottlePolicyRule
                     {
                         Entry = rule.Entry,
+                        HttpMethod=rule.HttpMethod,
                         PolicyType = (ThrottlePolicyType)rule.PolicyType,
                         LimitPerSecond = rule.LimitPerSecond,
                         LimitPerMinute = rule.LimitPerMinute,

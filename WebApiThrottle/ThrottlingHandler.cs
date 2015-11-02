@@ -217,7 +217,7 @@ namespace WebApiThrottle
             entry.ClientKey = request.Headers.Contains("Authorization-Token") 
                 ? request.Headers.GetValues("Authorization-Token").First() 
                 : "anon";
-
+            entry.HttpMethod = request.Method.Method.ToUpper();
             return entry;
         }
 
