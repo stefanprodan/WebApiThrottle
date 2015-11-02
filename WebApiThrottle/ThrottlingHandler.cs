@@ -103,6 +103,13 @@ namespace WebApiThrottle
         public string QuotaExceededMessage { get; set; }
 
         /// <summary>
+        /// Gets or sets a value that will be used as a formatter for the QuotaExceeded response message.
+        /// If none specified the default will be: 
+        /// API calls quota exceeded! maximum admitted {0} per {1}
+        /// </summary>
+        public Func<long, RateLimitPeriod, object> QuotaExceededContent { get; set; }
+
+        /// <summary>
         /// Gets or sets the value to return as the HTTP status 
         /// code when a request is rejected because of the
         /// throttling policy. The default value is 429 (Too Many Requests).
@@ -179,10 +186,14 @@ namespace WebApiThrottle
                             ? this.QuotaExceededMessage 
                             : "API calls quota exceeded! maximum admitted {0} per {1}.";
 
+                        var content = this.QuotaExceededContent != null
+                            ? this.QuotaExceededContent(rateLimit, rateLimitPeriod)
+                            : string.Format(message, rateLimit, rateLimitPeriod);
+
                         // break execution
                         return QuotaExceededResponse(
                             request,
-                            string.Format(message, rateLimit, rateLimitPeriod),
+                            content,
                             QuotaExceededResponseCode,
                             core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
                     }
@@ -215,9 +226,9 @@ namespace WebApiThrottle
             return core.ComputeThrottleKey(requestIdentity, period);
         }
 
-        protected virtual Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode, string retryAfter)
+        protected virtual Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, object content, HttpStatusCode responseCode, string retryAfter)
         {
-            var response = request.CreateResponse(responseCode, message);
+            var response = request.CreateResponse(responseCode, content);
             response.Headers.Add("Retry-After", new string[] { retryAfter });
             return Task.FromResult(response);
         }
