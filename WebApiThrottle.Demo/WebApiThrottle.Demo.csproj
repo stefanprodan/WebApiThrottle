@@ -170,7 +170,7 @@
     <Compile Include="Helpers\CustomThrottlingFilter.cs" />
     <Compile Include="Helpers\CustomThrottlingHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\CustomIpAddressParser.cs" />
+    <Compile Include="Net\CustomIpAddressParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />

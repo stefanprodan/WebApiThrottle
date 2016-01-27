@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Http;
 using WebApiThrottle.Net;
 
-namespace WebApiThrottle.Demo.Providers
+namespace WebApiThrottle.Demo.Net
 {
     public class CustomIpAddressParser : DefaultIpAddressParser
     {

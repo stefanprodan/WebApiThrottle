@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Tracing;
 using WebApiThrottle.Demo.Helpers;
-using WebApiThrottle.Demo.Providers;
+using WebApiThrottle.Demo.Net;
 
 namespace WebApiThrottle.Demo
 {
