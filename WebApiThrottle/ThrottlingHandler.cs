@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using WebApiThrottle.Net;
 
 namespace WebApiThrottle
 {
@@ -49,12 +50,24 @@ namespace WebApiThrottle
         /// <param name="logger">
         /// The logger.
         /// </param>
-        public ThrottlingHandler(ThrottlePolicy policy, IPolicyRepository policyRepository, IThrottleRepository repository, IThrottleLogger logger)
+        /// <param name="ipAddressParser">
+        /// The IpAddressParser
+        /// </param>
+        public ThrottlingHandler(ThrottlePolicy policy, 
+            IPolicyRepository policyRepository, 
+            IThrottleRepository repository, 
+            IThrottleLogger logger,
+            IIpAddressParser ipAddressParser = null)
         {
             core = new ThrottlingCore();
             core.Repository = repository;
             Repository = repository;
             Logger = logger;
+
+            if (ipAddressParser != null)
+            {
+                core.IpAddressParser = ipAddressParser;
+            }
 
             QuotaExceededResponseCode = (HttpStatusCode)429;
 

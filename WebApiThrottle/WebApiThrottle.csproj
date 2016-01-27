@@ -69,6 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\DisableThrottingAttribute.cs" />
+    <Compile Include="Net\DefaultIpAddressParser.cs" />
+    <Compile Include="Net\IIpAddressParser.cs" />
+    <Compile Include="Net\IpAddressUtil.cs" />
     <Compile Include="Repositories\IPolicyRepository.cs" />
     <Compile Include="Repositories\PolicyMemoryCacheRepository.cs" />
     <Compile Include="Repositories\PolicyCacheRepository.cs" />

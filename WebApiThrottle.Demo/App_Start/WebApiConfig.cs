@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Tracing;
 using WebApiThrottle.Demo.Helpers;
+using WebApiThrottle.Demo.Net;
 
 namespace WebApiThrottle.Demo
 {
@@ -61,7 +62,8 @@ namespace WebApiThrottle.Demo
                 },
                 policyRepository: new PolicyCacheRepository(),
                 repository: new CacheRepository(),
-                logger: new TracingThrottleLogger(traceWriter)));
+                logger: new TracingThrottleLogger(traceWriter),
+                ipAddressParser: new CustomIpAddressParser()));
 
             //Web API throttling handler load policy from web.config
             //config.MessageHandlers.Add(new ThrottlingHandler(

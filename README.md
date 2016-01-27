@@ -518,3 +518,21 @@ public class Startup
     }
 }
 ```
+
+### Custom ip address parsing
+
+If you need to extract client ip's from e.g. additional headers then you can plug in custom ipAddressParsers.
+There is an example implementation in the WebApiThrottle.Demo project - <code>WebApiThrottle.Demo.Net.CustomIpAddressParser</code>
+
+``` cs
+config.MessageHandlers.Add(new ThrottlingHandler(
+    policy: new ThrottlePolicy(perMinute: 20, perHour: 30, perDay: 35, perWeek: 3000)
+    {        
+        IpThrottling = true,
+        ///...
+    },
+    policyRepository: new PolicyCacheRepository(),
+    repository: new CacheRepository(),
+    logger: new TracingThrottleLogger(traceWriter),
+    ipAddressParser: new CustomIpAddressParser()));
+```
