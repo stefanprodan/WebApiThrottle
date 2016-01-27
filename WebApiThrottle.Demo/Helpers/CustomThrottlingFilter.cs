@@ -24,9 +24,9 @@ namespace WebApiThrottle.Demo.Helpers
             };
         }
 
-        protected override HttpResponseMessage QuotaExceededResponse(HttpRequestMessage request, string message, HttpStatusCode responseCode, string retryAfter)
+        protected override HttpResponseMessage QuotaExceededResponse(HttpRequestMessage request, object content, HttpStatusCode responseCode, string retryAfter)
         {
-            var response = request.CreateResponse(responseCode, message);
+            var response = request.CreateResponse(responseCode, request);
             response.Headers.Add("Retry-After", new string[] { retryAfter });
             return response;
         }

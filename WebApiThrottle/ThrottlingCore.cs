@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.ServiceModel.Channels;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
+using WebApiThrottle.Net;
 
 namespace WebApiThrottle
 {
@@ -15,86 +13,32 @@ namespace WebApiThrottle
     /// </summary>
     internal class ThrottlingCore
     {
+        public ThrottlingCore()
+        {
+            IpAddressParser = new DefaultIpAddressParser();
+        }
+
         private static readonly object ProcessLocker = new object();
 
         internal ThrottlePolicy Policy { get; set; }
 
         internal IThrottleRepository Repository { get; set; }
 
+        internal IIpAddressParser IpAddressParser { get; set; }
+
         internal bool ContainsIp(List<string> ipRules, string clientIp)
         {
-            var ip = IPAddress.Parse(clientIp);
-            if (ipRules != null && ipRules.Any())
-            {
-                foreach (var rule in ipRules)
-                {
-                    var range = new IPAddressRange(rule);
-                    if (range.Contains(ip))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return IpAddressParser.ContainsIp(ipRules, clientIp);
         }
 
         internal bool ContainsIp(List<string> ipRules, string clientIp, out string rule)
         {
-            rule = null;
-            var ip = IPAddress.Parse(clientIp);
-            if (ipRules != null && ipRules.Any())
-            {
-                foreach (var r in ipRules)
-                {
-                    var range = new IPAddressRange(r);
-                    if (range.Contains(ip))
-                    {
-                        rule = r;
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return IpAddressParser.ContainsIp(ipRules, clientIp, out rule);
         }
 
         internal IPAddress GetClientIp(HttpRequestMessage request)
         {
-            IPAddress ipAddress;
-
-            if (request.Properties.ContainsKey("MS_HttpContext"))
-            {
-                var ok = IPAddress.TryParse(((HttpContextBase)request.Properties["MS_HttpContext"]).Request.UserHostAddress, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-            if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
-            {
-                var ok = IPAddress.TryParse(((RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name]).Address, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-            if (request.Properties.ContainsKey("MS_OwinContext"))
-            {
-                var ok = IPAddress.TryParse(((Microsoft.Owin.OwinContext)request.Properties["MS_OwinContext"]).Request.RemoteIpAddress, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-
-            return null;
+            return IpAddressParser.GetClientIp(request);
         }
 
         internal ThrottleLogEntry ComputeLogEntry(string requestId, RequestIdentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
