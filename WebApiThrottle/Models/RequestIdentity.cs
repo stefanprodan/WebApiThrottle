@@ -17,5 +17,9 @@ namespace WebApiThrottle
         public string ClientKey { get; set; }
 
         public string Endpoint { get; set; }
+
+        public string ActionName { get; set; }
+
+        public string ControllerName { get; set; }
     }
 }
