@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using Microsoft.Owin;
 using WebApiThrottle.Net;
 
 namespace WebApiThrottle
@@ -44,6 +45,23 @@ namespace WebApiThrottle
         internal ThrottleLogEntry ComputeLogEntry(string requestId, RequestIdentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, HttpRequestMessage request)
         {
             return new ThrottleLogEntry
+            {
+                ClientIp = identity.ClientIp,
+                ClientKey = identity.ClientKey,
+                Endpoint = identity.Endpoint,
+                LogDate = DateTime.UtcNow,
+                RateLimit = rateLimit,
+                RateLimitPeriod = rateLimitPeriod,
+                RequestId = requestId,
+                StartPeriod = throttleCounter.Timestamp,
+                TotalRequests = throttleCounter.TotalRequests,
+                Request = request
+            };
+        }
+
+        internal OwinThrottleLogEntry ComputeLogEntry(string requestId, RequestIdentity identity, ThrottleCounter throttleCounter, string rateLimitPeriod, long rateLimit, IOwinRequest request)
+        {
+            return new OwinThrottleLogEntry
             {
                 ClientIp = identity.ClientIp,
                 ClientKey = identity.ClientKey,

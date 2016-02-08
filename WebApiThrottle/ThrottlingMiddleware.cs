@@ -1,10 +1,7 @@
 ﻿using Microsoft.Owin;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using WebApiThrottle.Net;
 
@@ -52,8 +49,8 @@ namespace WebApiThrottle
         public ThrottlingMiddleware(OwinMiddleware next, 
             ThrottlePolicy policy, 
             IPolicyRepository policyRepository, 
-            IThrottleRepository repository, 
-            IThrottleLogger logger,
+            IThrottleRepository repository,
+            IOwinThrottleLogger logger,
             IIpAddressParser ipAddressParser)
             : base(next)
         {
@@ -102,9 +99,9 @@ namespace WebApiThrottle
         public IThrottleRepository Repository { get; set; }
 
         /// <summary>
-        /// Gets or sets an instance of <see cref="IThrottleLogger"/> that logs traffic and blocked requests
+        /// Gets or sets an instance of <see cref="IOwinThrottleLogger"/> that logs traffic and blocked requests
         /// </summary>
-        public IThrottleLogger Logger { get; set; }
+        public IOwinThrottleLogger Logger { get; set; }
 
         /// <summary>
         /// Gets or sets a value that will be used as a formatter for the QuotaExceeded response message.
@@ -188,7 +185,7 @@ namespace WebApiThrottle
                         // log blocked request
                         if (Logger != null)
                         {
-                            Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, null));
+                            Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, context.Request));
                         }
 
                         var message = !string.IsNullOrEmpty(this.QuotaExceededMessage)

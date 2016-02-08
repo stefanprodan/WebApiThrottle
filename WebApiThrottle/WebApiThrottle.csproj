@@ -69,6 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\DisableThrottingAttribute.cs" />
+    <Compile Include="Logging\IOwinThrottleLogger.cs" />
+    <Compile Include="Logging\OwinThrottleLogEntry.cs" />
     <Compile Include="Net\DefaultIpAddressParser.cs" />
     <Compile Include="Net\IIpAddressParser.cs" />
     <Compile Include="Net\IpAddressUtil.cs" />
