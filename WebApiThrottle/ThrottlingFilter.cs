@@ -254,20 +254,20 @@ namespace WebApiThrottle
             var applyThrottling = false;
             attr = null;
 
-            if (filterContext.ActionDescriptor.ControllerDescriptor.GetCustomAttributes<EnableThrottlingAttribute>(true).Any())
+            if (filterContext.ActionDescriptor.ControllerDescriptor.GetCustomAttributes<EnableThrottlingAttribute>().Any())
             {
-                attr = filterContext.ActionDescriptor.ControllerDescriptor.GetCustomAttributes<EnableThrottlingAttribute>(true).First();
+                attr = filterContext.ActionDescriptor.ControllerDescriptor.GetCustomAttributes<EnableThrottlingAttribute>().First();
                 applyThrottling = true;
             }
 
-            if (filterContext.ActionDescriptor.GetCustomAttributes<EnableThrottlingAttribute>(true).Any())
+            if (filterContext.ActionDescriptor.GetCustomAttributes<EnableThrottlingAttribute>().Any())
             {
-                attr = filterContext.ActionDescriptor.GetCustomAttributes<EnableThrottlingAttribute>(true).First();
+                attr = filterContext.ActionDescriptor.GetCustomAttributes<EnableThrottlingAttribute>().First();
                 applyThrottling = true;
             }
 
             // explicit disabled
-            if (filterContext.ActionDescriptor.GetCustomAttributes<DisableThrottingAttribute>(true).Any())
+            if (filterContext.ActionDescriptor.GetCustomAttributes<DisableThrottingAttribute>().Any())
             {
                 applyThrottling = false;
             }
