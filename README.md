@@ -12,7 +12,7 @@ You can define these limits to address all requests made to an API or you can sc
 ---
 If your looking for the ASP.NET Core version please head to [KestrelRateLimit](https://github.com/stefanprodan/KestrelRateLimit).
 
-KestrelRateLimit is a total rewrite of WebApiThrottle and offers more flexibility in configuring rate limiting for Web API and MVP apps.
+KestrelRateLimit is a total rewrite of WebApiThrottle and offers more flexibility in configuring rate limiting for Web API and MVC apps.
 
 ---
 
