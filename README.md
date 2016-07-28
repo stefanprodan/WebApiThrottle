@@ -9,6 +9,13 @@ Web API throttling can be configured using the built-in ThrottlePolicy. You can 
 for different scenarios like allowing an IP or Client to make a maximum number of calls per second, per minute, per hour per day or even per week.
 You can define these limits to address all requests made to an API or you can scope the limits to each API route.  
 
+---
+If your looking for the ASP.NET Core version please head to [KestrelRateLimit](https://github.com/stefanprodan/KestrelRateLimit).
+
+KestrelRateLimit is a total rewrite of WebApiThrottle and offers more flexibility in configuring rate limiting for Web API and MVP apps.
+
+---
+
 ###Global throttling based on IP
 
 The setup bellow will limit the number of requests originated from the same IP. 
