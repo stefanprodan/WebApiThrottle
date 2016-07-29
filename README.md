@@ -10,7 +10,7 @@ for different scenarios like allowing an IP or Client to make a maximum number o
 You can define these limits to address all requests made to an API or you can scope the limits to each API route.  
 
 ---
-If you are looking for the ASP.NET Core version please head to [KestrelRateLimit](https://github.com/stefanprodan/AspNetCoreRateLimit) project.
+If you are looking for the ASP.NET Core version please head to [AspNetCoreRateLimit](https://github.com/stefanprodan/AspNetCoreRateLimit) project.
 
 AspNetCoreRateLimit is a full rewrite of WebApiThrottle and offers more flexibility in configuring rate limiting for Web API and MVC apps.
 
