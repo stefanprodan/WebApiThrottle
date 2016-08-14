@@ -149,6 +149,7 @@ namespace WebApiThrottle
             }
 
             TimeSpan timeSpan = TimeSpan.FromSeconds(1);
+            TimeSpan suspendSpan = TimeSpan.FromSeconds(0);
 
             // get default rates
             var defRates = core.RatesWithDefaults(Policy.Rates.ToList());
@@ -160,6 +161,8 @@ namespace WebApiThrottle
             }
 
             // apply policy
+            var suspendTime = policy.SuspendTime;
+
             foreach (var rate in defRates)
             {
                 var rateLimitPeriod = rate.Key;
@@ -174,7 +177,10 @@ namespace WebApiThrottle
                 {
                     // increment counter
                     string requestId;
-                    var throttleCounter = core.ProcessRequest(identity, timeSpan, rateLimitPeriod, out requestId);
+                    var throttleCounter = core.ProcessRequest(identity, timeSpan, rateLimitPeriod, rateLimit, suspendTime, out requestId);
+
+                    if (throttleCounter.TotalRequests >= rateLimit && suspendTime > 0)
+                        timeSpan = core.GetSuspendSpanFromPeriod(rateLimitPeriod, timeSpan, suspendTime);
 
                     // check if key expired
                     if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
@@ -199,7 +205,7 @@ namespace WebApiThrottle
                         response.OnSendingHeaders(state =>
                         {
                             var resp = (OwinResponse)state;
-                            resp.Headers.Add("Retry-After", new string[] { core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod) });
+                            resp.Headers.Add("Retry-After", new string[] { core.RetryAfterFrom(throttleCounter.Timestamp, suspendTime, rateLimitPeriod) });
                             resp.StatusCode = (int)QuotaExceededResponseCode;
                             resp.ReasonPhrase = string.Format(message, rateLimit, rateLimitPeriod);
                         }, response);

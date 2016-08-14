@@ -58,25 +58,29 @@ namespace WebApiThrottle
             };
         }
 
-        internal string RetryAfterFrom(DateTime timestamp, RateLimitPeriod period)
+        internal string RetryAfterFrom(DateTime timestamp, long suspendTime, RateLimitPeriod period)
         {
             var secondsPast = Convert.ToInt32((DateTime.UtcNow - timestamp).TotalSeconds);
             var retryAfter = 1;
             switch (period)
             {
+                case RateLimitPeriod.Second:
+                    retryAfter = (suspendTime > 1) ? (int)suspendTime : 1;
+                    break;
                 case RateLimitPeriod.Minute:
-                    retryAfter = 60;
+                    retryAfter = (suspendTime > 60) ? (int)suspendTime : (60 + (int) suspendTime);
                     break;
                 case RateLimitPeriod.Hour:
-                    retryAfter = 60 * 60;
+                    retryAfter = (60 * 60) + (int)suspendTime;
                     break;
                 case RateLimitPeriod.Day:
-                    retryAfter = 60 * 60 * 24;
+                    retryAfter = (60 * 60 * 24) + (int)suspendTime;
                     break;
                 case RateLimitPeriod.Week:
-                    retryAfter = 60 * 60 * 24 * 7;
+                    retryAfter = (60 * 60 * 24 * 7) + (int)suspendTime;
                     break;
             }
+
             retryAfter = retryAfter > 1 ? retryAfter - secondsPast : 1;
             return retryAfter.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
@@ -144,7 +148,7 @@ namespace WebApiThrottle
             {
                 hashBytes = algorithm.ComputeHash(idBytes);
             }
-            
+
             var hex = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
             return hex;
         }
@@ -179,7 +183,7 @@ namespace WebApiThrottle
             return defRates;
         }
 
-        internal ThrottleCounter ProcessRequest(RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, out string id)
+        internal ThrottleCounter ProcessRequest(RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, long rateLimit, long suspendTime, out string id)
         {
             var throttleCounter = new ThrottleCounter()
             {
@@ -189,12 +193,18 @@ namespace WebApiThrottle
 
             id = ComputeThrottleKey(requestIdentity, period);
 
+            TimeSpan suspendSpan = TimeSpan.FromSeconds(0);
+
             // serial reads and writes
             lock (ProcessLocker)
             {
                 var entry = Repository.FirstOrDefault(id);
                 if (entry.HasValue)
                 {
+                    var timeStamp = entry.Value.Timestamp;
+                    if (entry.Value.TotalRequests >= rateLimit && suspendTime > 0)
+                        timeSpan = GetSuspendSpanFromPeriod(period, timeSpan, suspendTime);
+
                     // entry has not expired
                     if (entry.Value.Timestamp + timeSpan >= DateTime.UtcNow)
                     {
@@ -204,7 +214,7 @@ namespace WebApiThrottle
                         // deep copy
                         throttleCounter = new ThrottleCounter
                         {
-                            Timestamp = entry.Value.Timestamp,
+                            Timestamp = timeStamp,
                             TotalRequests = totalRequests
                         };
                     }
@@ -237,6 +247,30 @@ namespace WebApiThrottle
                     break;
                 case RateLimitPeriod.Week:
                     timeSpan = TimeSpan.FromDays(7);
+                    break;
+            }
+
+            return timeSpan;
+        }
+
+        internal TimeSpan GetSuspendSpanFromPeriod(RateLimitPeriod rateLimitPeriod, TimeSpan timeSpan, long suspendTime)
+        {
+            switch (rateLimitPeriod)
+            {
+                case RateLimitPeriod.Second:
+                    timeSpan = (suspendTime > 1) ? TimeSpan.FromSeconds(suspendTime) : timeSpan;
+                    break;
+                case RateLimitPeriod.Minute:
+                    timeSpan = (suspendTime > 60) ? TimeSpan.FromSeconds(suspendTime) : (timeSpan + TimeSpan.FromSeconds(suspendTime));
+                    break;
+                case RateLimitPeriod.Hour:
+                    timeSpan += TimeSpan.FromSeconds(suspendTime);
+                    break;
+                case RateLimitPeriod.Day:
+                    timeSpan += TimeSpan.FromSeconds(suspendTime);
+                    break;
+                case RateLimitPeriod.Week:
+                    timeSpan += TimeSpan.FromSeconds(suspendTime);
                     break;
             }
 

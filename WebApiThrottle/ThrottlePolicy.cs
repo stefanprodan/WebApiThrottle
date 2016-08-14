@@ -89,6 +89,11 @@ namespace WebApiThrottle
         /// </summary>
         public bool StackBlockedRequests { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value to suspend request after rate limit exceeded (in seconds) 
+        /// </summary>
+        public long SuspendTime { get; set; }
+
         internal Dictionary<RateLimitPeriod, long> Rates { get; set; }
 
         public static ThrottlePolicy FromStore(IThrottlePolicyProvider provider)
@@ -108,6 +113,7 @@ namespace WebApiThrottle
             policy.ClientThrottling = settings.ClientThrottling;
             policy.EndpointThrottling = settings.EndpointThrottling;
             policy.StackBlockedRequests = settings.StackBlockedRequests;
+            policy.SuspendTime = settings.SuspendTime;
 
             policy.IpRules = new Dictionary<string, RateLimits>();
             policy.ClientRules = new Dictionary<string, RateLimits>();
@@ -119,13 +125,13 @@ namespace WebApiThrottle
             foreach (var item in rules)
             {
                 var rateLimit = new RateLimits
-                                    {
-                                        PerSecond = item.LimitPerSecond,
-                                        PerMinute = item.LimitPerMinute,
-                                        PerHour = item.LimitPerHour,
-                                        PerDay = item.LimitPerDay,
-                                        PerWeek = item.LimitPerWeek
-                                    };
+                {
+                    PerSecond = item.LimitPerSecond,
+                    PerMinute = item.LimitPerMinute,
+                    PerHour = item.LimitPerHour,
+                    PerDay = item.LimitPerDay,
+                    PerWeek = item.LimitPerWeek
+                };
 
                 switch (item.PolicyType)
                 {
