@@ -112,5 +112,15 @@ namespace WebApiThrottle
                 return this["whitelists"] as ThrottlePolicyWhitelistConfigurationCollection;
             }
         }
+
+        [ConfigurationProperty("suspendTime", DefaultValue = "0", IsRequired = false)]
+        [LongValidator(ExcludeRange = false, MinValue = 0)]
+        public long SuspendTime
+        {
+            get
+            {
+                return (long)this["suspendTime"];
+            }
+        }
     }
 }

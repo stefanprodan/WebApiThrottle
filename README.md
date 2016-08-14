@@ -168,6 +168,29 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 });
 ```
 
+###Add additional Suspend Time after rate limit exceeded
+
+The setup bellow will block request for 5 minutes after rate limit exceeded 
+
+``` cs
+public static class WebApiConfig
+{
+	public static void Register(HttpConfiguration config)
+	{
+		config.MessageHandlers.Add(new ThrottlingHandler()
+		{
+			Policy = new ThrottlePolicy(perSecond: 1, perMinute: 20, perHour: 200, perDay: 1500, perWeek: 3000)
+			{
+				IpThrottling = true,
+				SuspendTime = 300
+			},
+			Repository = new CacheRepository()
+		});
+	}
+}
+```
+
+
 ### Stack rejected requests
 
 By default, rejected calls are not added to the throttle counter. If a client makes 3 requests per second 

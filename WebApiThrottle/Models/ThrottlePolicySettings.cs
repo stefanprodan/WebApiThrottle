@@ -26,5 +26,7 @@ namespace WebApiThrottle
         public bool EndpointThrottling { get; set; }
 
         public bool StackBlockedRequests { get; set; }
+
+        public long SuspendTime { get; set; }
     }
 }
