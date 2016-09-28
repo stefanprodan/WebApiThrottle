@@ -18,9 +18,3 @@
       <dependency id="Newtonsoft.Json" version="6.0.8" />
     </dependencies>
   </metadata>
-  <files>
-    <file src="..\WebApiThrottle\bin\Release\WebApiThrottle.dll" target="lib\net45" />
-    <file src="..\WebApiThrottle\bin\Release\WebApiThrottle.xml" target="lib\net45" />
-    <file src="..\WebApiThrottle\bin\Release\WebApiThrottle.pdb" target="lib\net45" />
-  </files>
-</package>
