@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiThrottle.Demo", "WebApiThrottle.Demo\WebApiThrottle.Demo.csproj", "{B9BC1965-4DBD-413C-83D5-5FD9E819DCCE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiThrottle", "WebApiThrottle\WebApiThrottle.csproj", "{F049811F-BC05-4CEE-B329-CE3BF2E2E4BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiThrottler.SelfHostOwinDemo", "WebApiThrottler.SelfHostOwinDemo\WebApiThrottler.SelfHostOwinDemo.csproj", "{22B91BA0-EFC9-4AF8-A24B-CF1CB476A50D}"
@@ -23,10 +21,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B9BC1965-4DBD-413C-83D5-5FD9E819DCCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9BC1965-4DBD-413C-83D5-5FD9E819DCCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9BC1965-4DBD-413C-83D5-5FD9E819DCCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9BC1965-4DBD-413C-83D5-5FD9E819DCCE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F049811F-BC05-4CEE-B329-CE3BF2E2E4BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F049811F-BC05-4CEE-B329-CE3BF2E2E4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F049811F-BC05-4CEE-B329-CE3BF2E2E4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
