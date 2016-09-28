@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright 2013 Stefan Prodan (http://www.stefanprodan.eu/)
+Copyright 2013-2016 Stefan Prodan (https://stefanprodan.com/)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
