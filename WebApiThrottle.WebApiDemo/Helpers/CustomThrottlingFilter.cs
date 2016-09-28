@@ -14,7 +14,7 @@ namespace WebApiThrottle.WebApiDemo.Helpers
             this.QuotaExceededMessage = "API calls quota exceeded! maximum admitted {0} per {1}.";
         }
 
-        protected override RequestIdentity SetIndentity(HttpRequestMessage request)
+        protected override RequestIdentity SetIdentity(HttpRequestMessage request)
         {
             return new RequestIdentity()
             {

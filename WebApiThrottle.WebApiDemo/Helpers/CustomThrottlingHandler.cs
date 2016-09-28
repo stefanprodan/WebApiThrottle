@@ -7,7 +7,7 @@ namespace WebApiThrottle.WebApiDemo.Helpers
 {
     public class CustomThrottlingHandler : ThrottlingHandler
     {
-        protected override RequestIdentity SetIndentity(System.Net.Http.HttpRequestMessage request)
+        protected override RequestIdentity SetIdentity(System.Net.Http.HttpRequestMessage request)
         {
             return new RequestIdentity()
             {

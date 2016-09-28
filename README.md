@@ -248,12 +248,12 @@ Config example (policyType values are 1 - IP, 2 - ClientKey, 3 - Endpoint):
 ### Retrieving API Client Key
 
 By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value. 
-If your API key is stored differently, you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify your own retrieval method.
+If your API key is stored differently, you can override the <code>ThrottlingHandler.SetIdentity</code> function and specify your own retrieval method.
 
 ``` cs
 public class CustomThrottlingHandler : ThrottlingHandler
 {
-	protected override RequestIdentity SetIndentity(HttpRequestMessage request)
+	protected override RequestIdentity SetIdentity(HttpRequestMessage request)
 	{
 		return new RequestIdentity()
 		{
