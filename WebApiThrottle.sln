@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{D4FF49
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiThrottle.WebApiDemo", "WebApiThrottle.WebApiDemo\WebApiThrottle.WebApiDemo.csproj", "{62251AC4-F48A-442B-B1B3-0164D97661EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{22B91BA0-EFC9-4AF8-A24B-CF1CB476A50D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22B91BA0-EFC9-4AF8-A24B-CF1CB476A50D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22B91BA0-EFC9-4AF8-A24B-CF1CB476A50D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62251AC4-F48A-442B-B1B3-0164D97661EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62251AC4-F48A-442B-B1B3-0164D97661EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62251AC4-F48A-442B-B1B3-0164D97661EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62251AC4-F48A-442B-B1B3-0164D97661EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
