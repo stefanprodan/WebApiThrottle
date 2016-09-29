@@ -102,7 +102,7 @@ namespace WebApiThrottle
             if (Policy.EndpointThrottling)
             {
                 if (Policy.EndpointWhitelist != null
-                    && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.Contains(x.ToLowerInvariant())))
+                    && Policy.EndpointWhitelist.Any(x => requestIdentity.Endpoint.IndexOf(x, 0, StringComparison.InvariantCultureIgnoreCase) != -1))
                 {
                     return true;
                 }
@@ -248,7 +248,7 @@ namespace WebApiThrottle
             // apply endpoint rate limits
             if (Policy.EndpointRules != null)
             {
-                var rules = Policy.EndpointRules.Where(x => identity.Endpoint.Contains(x.Key.ToLowerInvariant())).ToList();
+                var rules = Policy.EndpointRules.Where(x => identity.Endpoint.IndexOf(x.Key, 0, StringComparison.InvariantCultureIgnoreCase) != -1).ToList();
                 if (rules.Any())
                 {
                     // get the lower limit from all applying rules
