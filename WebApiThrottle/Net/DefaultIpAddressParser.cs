@@ -21,35 +21,14 @@ namespace WebApiThrottle.Net
         public virtual IPAddress GetClientIp(HttpRequestMessage request)
         {
             IPAddress ipAddress;
+            
+            // use the extension method to get the client ip address as this will
+            // handle the X-Forward-For header
+            var ok = IPAddress.TryParse(request.GetClientIpAddress(), out ipAddress);
 
-            if (request.Properties.ContainsKey("MS_HttpContext"))
+            if (ok)
             {
-                var ok = IPAddress.TryParse(((HttpContextBase)request.Properties["MS_HttpContext"]).Request.UserHostAddress, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-            if (request.Properties.ContainsKey(RemoteEndpointMessageProperty.Name))
-            {
-                var ok = IPAddress.TryParse(((RemoteEndpointMessageProperty)request.Properties[RemoteEndpointMessageProperty.Name]).Address, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
-            }
-
-            if (request.Properties.ContainsKey("MS_OwinContext"))
-            {
-                var ok = IPAddress.TryParse(((Microsoft.Owin.OwinContext)request.Properties["MS_OwinContext"]).Request.RemoteIpAddress, out ipAddress);
-
-                if (ok)
-                {
-                    return ipAddress;
-                }
+                return ipAddress;
             }
 
 
@@ -60,5 +39,6 @@ namespace WebApiThrottle.Net
         {
             return IpAddressUtil.ParseIp(ipAddress);
         }
+
     }
 }
