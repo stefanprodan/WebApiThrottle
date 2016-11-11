@@ -5,7 +5,7 @@
     <authors>Stefan Prodan</authors>
     <owners>Stefan Prodan</owners>
     <id>WebApiThrottle.StrongName</id>
-    <title>ASP.NET Web API Rate Limiter</title>
+    <title>ASP.NET Web API Rate Limiter Strong-Named</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>WebApiThrottle message handler and action filter are designed for controlling the rate of requests that clients can make to an API based on IP address, client API key and request route. WebApiThrottle works with ASP.NET Web API hosted is IIS, Owin with IIS and Owin self-hosted.</description>
 	<releaseNotes>If you are looking for the ASP.NET Core version please use AspNetCoreRateLimit package</releaseNotes>
