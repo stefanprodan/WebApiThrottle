@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("WebApiThrottle.StrongName")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Throttling handler and filter for ASP.NET Web API, strong-named version")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("stefanprodan.com")]
 [assembly: AssemblyProduct("WebApiThrottle.StrongName")]
 [assembly: AssemblyCopyright("Copyright © Stefan Prodan 2016")]
 [assembly: AssemblyTrademark("")]
