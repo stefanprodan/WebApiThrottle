@@ -83,6 +83,11 @@ namespace WebApiThrottle
 
         internal bool IsWhitelisted(RequestIdentity requestIdentity)
         {
+            if (requestIdentity.ForceWhiteList)
+            {
+                return true;
+            }
+
             if (Policy.IpThrottling)
             {
                 if (Policy.IpWhitelist != null && ContainsIp(Policy.IpWhitelist, requestIdentity.ClientIp))
