@@ -17,5 +17,7 @@ namespace WebApiThrottle
         public string ClientKey { get; set; }
 
         public string Endpoint { get; set; }
+
+        public bool ForceWhiteList { get; set; }
     }
 }
