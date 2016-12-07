@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -46,6 +47,13 @@ namespace WebApiThrottle.Net
 
         public static IPAddress ParseIp(string ipAddress)
         {
+            int portDelimiterPos = ipAddress.IndexOf(":", StringComparison.InvariantCultureIgnoreCase);
+            if (portDelimiterPos != -1)
+            {
+                ipAddress = ipAddress.Substring(0, portDelimiterPos);
+            }
+
+
             return IPAddress.Parse(ipAddress);
         }
 
@@ -58,7 +66,7 @@ namespace WebApiThrottle.Net
             //  16-bit block: 192.168.0.0 through 192.168.255.255
             //  Link-local addresses: 169.254.0.0 through 169.254.255.255 (http://en.wikipedia.org/wiki/Link-local_address)
 
-            var ip = IPAddress.Parse(ipAddress);
+            var ip = ParseIp(ipAddress);
             var octets = ip.GetAddressBytes();
 
             var is24BitBlock = octets[0] == 10;
