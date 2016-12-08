@@ -25,11 +25,35 @@ namespace WebApiThrottle.Tests
 
             Assert.Equal(false, result);
         }
+        
+        [Fact]
+        public void IsPrivateIpAddress_PublicAddressIpv6_ReturnsFalse()
+        {
+            bool result = IpAddressUtil.IsPrivateIpAddress("2001:4860:4860::8888");
+
+            Assert.Equal(false, result);
+        }
+
+        [Fact]
+        public void IsPrivateIpAddress_PrivateAddressIpv6_ReturnsFalse()
+        {
+            bool result = IpAddressUtil.IsPrivateIpAddress("fd74:20cf:81a2::");
+
+            Assert.Equal(true, result);
+        }
 
         [Fact]
         public void IsPrivateIpAddress_PrivateAddressWithPort_ReturnsTrue()
         {
             bool result = IpAddressUtil.IsPrivateIpAddress("10.0.0.1:5555");
+
+            Assert.Equal(true, result);
+        }
+
+        [Fact]
+        public void IsPrivateIpAddress_PrivateAddressIpv6WithPort_ReturnsTrue()
+        {
+            bool result = IpAddressUtil.IsPrivateIpAddress("[fd74:20cf:81a2::]:5555");
 
             Assert.Equal(true, result);
         }
