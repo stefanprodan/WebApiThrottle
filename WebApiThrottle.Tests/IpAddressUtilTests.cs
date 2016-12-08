@@ -57,5 +57,13 @@ namespace WebApiThrottle.Tests
 
             Assert.Equal(true, result);
         }
+
+        [Fact]
+        public void IsPrivateIpAddress_PublicIpAddressWithInitialSpace_ReturnsFalse()
+        {
+            bool result = IpAddressUtil.IsPrivateIpAddress(" 8.8.8.8");
+
+            Assert.Equal(false, result);
+        }
     }
 }

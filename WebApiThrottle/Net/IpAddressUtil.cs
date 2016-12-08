@@ -48,6 +48,7 @@ namespace WebApiThrottle.Net
 
         public static IPAddress ParseIp(string ipAddress)
         {
+            ipAddress = ipAddress.Trim();
             int portDelimiterPos = ipAddress.LastIndexOf(":", StringComparison.InvariantCultureIgnoreCase);
             bool ipv6WithPortStart = ipAddress.StartsWith("[");
             int ipv6End = ipAddress.IndexOf("]");
