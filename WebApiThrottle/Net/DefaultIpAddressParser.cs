@@ -20,19 +20,7 @@ namespace WebApiThrottle.Net
 
         public virtual IPAddress GetClientIp(HttpRequestMessage request)
         {
-            IPAddress ipAddress;
-            
-            // use the extension method to get the client ip address as this will
-            // handle the X-Forward-For header
-            var ok = IPAddress.TryParse(request.GetClientIpAddress(), out ipAddress);
-
-            if (ok)
-            {
-                return ipAddress;
-            }
-
-
-            return null;
+            return ParseIp(request.GetClientIpAddress());
         }
 
         public IPAddress ParseIp(string ipAddress)
