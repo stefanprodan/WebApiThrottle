@@ -210,7 +210,7 @@ namespace WebApiThrottle
                                 // add status code and retry after x seconds to response
                                 actionContext.Response = QuotaExceededResponse(
                                     actionContext.Request,
-                                    string.Format(message, rateLimit, rateLimitPeriod),
+                                    content,
                                     QuotaExceededResponseCode,
                                     core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
                             }
