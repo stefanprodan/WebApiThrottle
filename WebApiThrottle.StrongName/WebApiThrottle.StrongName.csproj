@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F049811F-BC05-4CEE-B329-CE3BF2E2E4BE}</ProjectGuid>
+    <ProjectGuid>{FBF3012B-08EF-408C-9E7D-175ABF286CB4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebApiThrottle</RootNamespace>
-    <AssemblyName>WebApiThrottle</AssemblyName>
+    <RootNamespace>WebApiThrottle.StrongName</RootNamespace>
+    <AssemblyName>WebApiThrottle.StrongName</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,7 +28,12 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\WebApiThrottle.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>WebApiThrottle.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -68,50 +71,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\DisableThrottingAttribute.cs" />
-    <Compile Include="Models\EndpointThrottlingMethod.cs" />
-    <Compile Include="Net\DefaultIpAddressParser.cs" />
-    <Compile Include="Net\HttpRequestExtensions.cs" />
-    <Compile Include="Net\IIpAddressParser.cs" />
-    <Compile Include="Net\IpAddressUtil.cs" />
-    <Compile Include="Repositories\IPolicyRepository.cs" />
-    <Compile Include="Repositories\PolicyMemoryCacheRepository.cs" />
-    <Compile Include="Repositories\PolicyCacheRepository.cs" />
-    <Compile Include="Repositories\ConcurrentDictionaryRepository.cs" />
-    <Compile Include="Models\IPAddressRange.cs" />
-    <Compile Include="Logging\IThrottleLogger.cs" />
-    <Compile Include="Providers\IThrottlePolicyProvider.cs" />
-    <Compile Include="Repositories\IThrottleRepository.cs" />
-    <Compile Include="Repositories\MemoryCacheRepository.cs" />
-    <Compile Include="Providers\PolicyConfigurationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Models\RateLimitPeriod.cs" />
-    <Compile Include="Models\RateLimits.cs" />
-    <Compile Include="Models\ThrottleCounter.cs" />
-    <Compile Include="Logging\ThrottleLogEntry.cs" />
-    <Compile Include="Attributes\EnableThrottlingAttribute.cs" />
-    <Compile Include="ThrottlingMiddleware.cs" />
-    <Compile Include="ThrottleManager.cs" />
-    <Compile Include="ThrottlePolicy.cs" />
-    <Compile Include="Repositories\CacheRepository.cs" />
-    <Compile Include="Models\RequestIdentity.cs" />
-    <Compile Include="Configuration\ThrottlePolicyConfiguration.cs" />
-    <Compile Include="Configuration\ThrottlePolicyRuleConfigurationCollection.cs" />
-    <Compile Include="Configuration\ThrottlePolicyRuleConfigurationElement.cs" />
-    <Compile Include="Models\ThrottlePolicySettings.cs" />
-    <Compile Include="Models\ThrottlePolicyRule.cs" />
-    <Compile Include="Models\ThrottlePolicyType.cs" />
-    <Compile Include="Models\ThrottlePolicyWhitelist.cs" />
-    <Compile Include="Configuration\ThrottlePolicyWhitelistConfigurationCollection.cs" />
-    <Compile Include="Configuration\ThrottlePolicyWhitelistConfigurationElement.cs" />
-    <Compile Include="ThrottlingCore.cs" />
-    <Compile Include="ThrottlingFilter.cs" />
-    <Compile Include="ThrottlingHandler.cs" />
-    <Compile Include="Logging\TracingThrottleLogger.cs" />
+    <Compile Include="../WebApiThrottle/**/*.cs" Exclude="../WebApiThrottle/obj/**/*.*;../WebApiThrottle/**/AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="WebApiThrottle.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>

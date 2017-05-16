@@ -145,7 +145,7 @@ namespace WebApiThrottle
             core.Repository = Repository;
             core.Policy = policy;
 
-            var identity = SetIndentity(request);
+            var identity = SetIdentity(request);
 
             if (core.IsWhitelisted(identity))
             {
@@ -222,7 +222,7 @@ namespace WebApiThrottle
             return core.GetClientIp(request);
         }
 
-        protected virtual RequestIdentity SetIndentity(HttpRequestMessage request)
+        protected virtual RequestIdentity SetIdentity(HttpRequestMessage request)
         {
             var entry = new RequestIdentity();
             entry.ClientIp = core.GetClientIp(request).ToString();

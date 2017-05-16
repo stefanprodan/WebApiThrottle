@@ -28,6 +28,7 @@ namespace WebApiThrottler.SelfHostOwinDemo
                 ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
                 new PolicyMemoryCacheRepository(),
                 new MemoryCacheRepository(),
+                null,
                 null);
 
             //Web API throttling load policy from app.config

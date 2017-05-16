@@ -145,7 +145,7 @@ namespace WebApiThrottle
                 core.Repository = Repository;
                 core.Policy = Policy;
 
-                var identity = SetIndentity(actionContext.Request);
+                var identity = SetIdentity(actionContext.Request);
 
                 if (!core.IsWhitelisted(identity))
                 {
@@ -210,7 +210,7 @@ namespace WebApiThrottle
                                 // add status code and retry after x seconds to response
                                 actionContext.Response = QuotaExceededResponse(
                                     actionContext.Request,
-                                    string.Format(message, rateLimit, rateLimitPeriod),
+                                    content,
                                     QuotaExceededResponseCode,
                                     core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
                             }
@@ -222,7 +222,7 @@ namespace WebApiThrottle
             base.OnActionExecuting(actionContext);
         }
 
-        protected virtual RequestIdentity SetIndentity(HttpRequestMessage request)
+        protected virtual RequestIdentity SetIdentity(HttpRequestMessage request)
         {
             var entry = new RequestIdentity();
             entry.ClientIp = core.GetClientIp(request).ToString();

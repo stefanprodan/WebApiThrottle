@@ -1,6 +1,9 @@
 WebApiThrottle
 ==============
 
+[![Build status](https://ci.appveyor.com/api/projects/status/vdvuhk2c0tqds297?svg=true)](https://ci.appveyor.com/project/stefanprodan/webapithrottle) 
+[![NuGet](https://img.shields.io/nuget/v/WebApiThrottle.svg)](https://www.nuget.org/packages/WebApiThrottle)
+
 ASP.NET Web API Throttling handler, OWIN middleware and filter are designed to control the rate of requests that clients 
 can make to a Web API based on IP address, client API key and request route. 
 WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrottle](https://www.nuget.org/packages/WebApiThrottle/).
@@ -8,6 +11,13 @@ WebApiThrottle package is available on NuGet at [nuget.org/packages/WebApiThrott
 Web API throttling can be configured using the built-in ThrottlePolicy. You can set multiple limits 
 for different scenarios like allowing an IP or Client to make a maximum number of calls per second, per minute, per hour per day or even per week.
 You can define these limits to address all requests made to an API or you can scope the limits to each API route.  
+
+---
+If you are looking for the ASP.NET Core version please head to [AspNetCoreRateLimit](https://github.com/stefanprodan/AspNetCoreRateLimit) project.
+
+AspNetCoreRateLimit is a full rewrite of WebApiThrottle and offers more flexibility in configuring rate limiting for Web API and MVC apps.
+
+---
 
 ###Global throttling based on IP
 
@@ -239,12 +249,12 @@ Config example (policyType values are 1 - IP, 2 - ClientKey, 3 - Endpoint):
 ### Retrieving API Client Key
 
 By default, the ThrottlingHandler retrieves the client API key from the "Authorization-Token" request header value. 
-If your API key is stored differently, you can override the <code>ThrottlingHandler.SetIndentity</code> function and specify your own retrieval method.
+If your API key is stored differently, you can override the <code>ThrottlingHandler.SetIdentity</code> function and specify your own retrieval method.
 
 ``` cs
 public class CustomThrottlingHandler : ThrottlingHandler
 {
-	protected override RequestIdentity SetIndentity(HttpRequestMessage request)
+	protected override RequestIdentity SetIdentity(HttpRequestMessage request)
 	{
 		return new RequestIdentity()
 		{
@@ -418,7 +428,7 @@ config.MessageHandlers.Add(new ThrottlingHandler()
 
 ### Attribute-based rate limiting with ThrottlingFilter and EnableThrottlingAttribute
 
-As an alternative to the ThrottlingHandler, ThrottlingFilter does the same thing but allows custom rate limits to be specified by decorating Web API controllers and actions with EnableThrottlingAttribute. Be aware that when a request is processed, the ThrottlingHandler executes before the http controller dispatcher in the [Web API request pipeline](http://www.asp.net/posters/web-api/asp.net-web-api-poster-grayscale.pdf), therefore it is preferable that you always use the handler instead of the filter when you don't need the features that the ThrottlingFilter provides.
+As an alternative to the ThrottlingHandler, ThrottlingFilter does the same thing but allows custom rate limits to be specified by decorating Web API controllers and actions with EnableThrottlingAttribute. Be aware that when a request is processed, the ThrottlingHandler executes before the http controller dispatcher in the [Web API request pipeline](https://www.asp.net/media/4071077/aspnet-web-api-poster.pdf), therefore it is preferable that you always use the handler instead of the filter when you don't need the features that the ThrottlingFilter provides.
 
 Setup the filter as you would the ThrottlingHandler:
 
@@ -491,6 +501,7 @@ public class Startup
             ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
             new PolicyMemoryCacheRepository(),
             new MemoryCacheRepository(),
+            null,
             null);
 
         ...
@@ -512,7 +523,8 @@ public class Startup
 	    ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
 	    new PolicyCacheRepository(),
 	    new CacheRepository(),
-	    null);
+        null,
+        null);
 
         ...
     }
