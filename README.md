@@ -19,7 +19,7 @@ AspNetCoreRateLimit is a full rewrite of WebApiThrottle and offers more flexibil
 
 ---
 
-###Global throttling based on IP
+### Global throttling based on IP
 
 The setup bellow will limit the number of requests originated from the same IP. 
 If from the same IP, in same second, you'll make a call to <code>api/values</code> and <code>api/values/1</code> the last call will get blocked.
