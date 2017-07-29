@@ -184,15 +184,13 @@ namespace WebApiThrottle
             return defRates;
         }
 
-        internal ThrottleCounter ProcessRequest(RequestIdentity requestIdentity, TimeSpan timeSpan, RateLimitPeriod period, out string id)
+        internal ThrottleCounter ProcessRequest(TimeSpan timeSpan, string id)
         {
             var throttleCounter = new ThrottleCounter()
             {
                 Timestamp = DateTime.UtcNow,
                 TotalRequests = 1
             };
-
-            id = ComputeThrottleKey(requestIdentity, period);
 
             // serial reads and writes
             lock (ProcessLocker)
