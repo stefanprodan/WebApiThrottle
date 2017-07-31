@@ -89,7 +89,7 @@ namespace WebApiThrottle
         /// </summary>
         public bool StackBlockedRequests { get; set; }
 
-        internal Dictionary<RateLimitPeriod, long> Rates { get; set; }
+        public Dictionary<RateLimitPeriod, long> Rates { get; set; }
 
         public static ThrottlePolicy FromStore(IThrottlePolicyProvider provider)
         {
