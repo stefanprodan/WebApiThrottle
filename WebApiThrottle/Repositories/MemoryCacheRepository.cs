@@ -1,61 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
-using System.Text;
-using System.Threading.Tasks;
+using WebApiThrottle.Models;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Repositories
 {
     /// <summary>
-    /// Stors throttle metrics in runtime cache, intented for owin self host.
+    ///     Stors throttle metrics in runtime cache, intented for owin self host.
     /// </summary>
     public class MemoryCacheRepository : IThrottleRepository
     {
-        ObjectCache memCache = MemoryCache.Default;
+        private readonly ObjectCache _memCache = MemoryCache.Default;
 
         /// <summary>
-        /// Insert or update
+        ///     Insert or update
         /// </summary>
         public void Save(string id, ThrottleCounter throttleCounter, TimeSpan expirationTime)
         {
-            if (memCache[id] != null)
-            {
-                memCache[id] = throttleCounter;
-            }
+            if (_memCache[id] != null)
+                _memCache[id] = throttleCounter;
             else
-            {
-                memCache.Add(
+                _memCache.Add(
                     id,
-                    throttleCounter, new CacheItemPolicy()
+                    throttleCounter, new CacheItemPolicy
                     {
                         SlidingExpiration = expirationTime
                     });
-            }
         }
 
         public bool Any(string id)
         {
-            return memCache[id] != null;
+            return _memCache[id] != null;
         }
 
         public ThrottleCounter? FirstOrDefault(string id)
         {
-            return (ThrottleCounter?)memCache[id];
+            return (ThrottleCounter?) _memCache[id];
         }
 
         public void Remove(string id)
         {
-            memCache.Remove(id);
+            _memCache.Remove(id);
         }
 
         public void Clear()
         {
-            var cacheKeys = memCache.Where(kvp => kvp.Value is ThrottleCounter).Select(kvp => kvp.Key).ToList();
-            foreach (string cacheKey in cacheKeys)
-            {
-                memCache.Remove(cacheKey);
-            }
+            var cacheKeys = _memCache.Where(kvp => kvp.Value is ThrottleCounter).Select(kvp => kvp.Key).ToList();
+            foreach (var cacheKey in cacheKeys)
+                _memCache.Remove(cacheKey);
         }
     }
 }

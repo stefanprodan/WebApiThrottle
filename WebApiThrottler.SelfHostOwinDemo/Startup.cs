@@ -1,11 +1,8 @@
-﻿using Owin;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Http;
+﻿using System.Web.Http;
+using Owin;
 using WebApiThrottle;
+using WebApiThrottle.Providers;
+using WebApiThrottle.Repositories;
 
 namespace WebApiThrottler.SelfHostOwinDemo
 {
@@ -16,27 +13,27 @@ namespace WebApiThrottler.SelfHostOwinDemo
         public void Configuration(IAppBuilder appBuilder)
         {
             // Configure Web API for self-host. 
-            HttpConfiguration config = new HttpConfiguration();
+            var config = new HttpConfiguration();
             config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
+                "DefaultApi",
+                "api/{controller}/{id}",
+                new {id = RouteParameter.Optional}
             );
 
             //middleware with policy loaded from app.config
-            appBuilder.Use(typeof(ThrottlingMiddleware),
-                ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
-                new PolicyMemoryCacheRepository(),
-                new MemoryCacheRepository(),
-                null,
-                null);
+            //appBuilder.Use(typeof(ThrottlingMiddleware),
+            //    ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+            //    new PolicyMemoryCacheRepository(),
+            //    new MemoryCacheRepository(),
+            //    null,
+            //    null);
 
             //Web API throttling load policy from app.config
-            //config.MessageHandlers.Add(new ThrottlingHandler()
-            //{
-            //    Policy = ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
-            //    Repository = new MemoryCacheRepository()
-            //});
+            config.MessageHandlers.Add(new ThrottlingHandler
+            {
+                Policy = ThrottlePolicy.FromStore(new PolicyConfigurationProvider()),
+                Repository = new MemoryCacheRepository()
+            });
 
             //Web API throttling hardcoded policy
             //config.MessageHandlers.Add(new ThrottlingHandler()
@@ -76,5 +73,5 @@ namespace WebApiThrottler.SelfHostOwinDemo
 
             appBuilder.UseWebApi(config);
         }
-    } 
+    }
 }

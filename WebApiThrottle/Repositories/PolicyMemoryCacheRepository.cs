@@ -1,43 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Caching;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Caching;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Repositories
 {
     /// <summary>
-    /// Stores policy in runtime cache, intended for OWIN self host.
+    ///     Stores policy in runtime cache, intended for OWIN self host.
     /// </summary>
     public class PolicyMemoryCacheRepository : IPolicyRepository
     {
-        private ObjectCache memCache = MemoryCache.Default;
+        private readonly ObjectCache _memCache = MemoryCache.Default;
 
         public void Save(string id, ThrottlePolicy policy)
         {
-            if (memCache[id] != null)
-            {
-                memCache[id] = policy;
-            }
+            if (_memCache[id] != null)
+                _memCache[id] = policy;
             else
-            {
-                memCache.Add(
+                _memCache.Add(
                     id,
-                    policy, 
+                    policy,
                     new CacheItemPolicy());
-            }
         }
 
         public ThrottlePolicy FirstOrDefault(string id)
         {
-            var policy = (ThrottlePolicy)memCache[id];
+            var policy = (ThrottlePolicy) _memCache[id];
             return policy;
         }
 
         public void Remove(string id)
         {
-            memCache.Remove(id);
+            _memCache.Remove(id);
         }
     }
 }

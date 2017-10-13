@@ -1,80 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Configuration
 {
     public class ThrottlePolicyRuleConfigurationElement : ConfigurationElement
     {
         [ConfigurationProperty("limitPerSecond", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerSecond
-        {
-            get
-            {
-                return (long)this["limitPerSecond"];
-            }
-        }
+        public long LimitPerSecond => (long) this["limitPerSecond"];
 
         [ConfigurationProperty("limitPerMinute", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerMinute
-        {
-            get
-            {
-                return (long)this["limitPerMinute"];
-            }
-        }
+        public long LimitPerMinute => (long) this["limitPerMinute"];
 
         [ConfigurationProperty("limitPerHour", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerHour
-        {
-            get
-            {
-                return (long)this["limitPerHour"];
-            }
-        }
+        public long LimitPerHour => (long) this["limitPerHour"];
 
         [ConfigurationProperty("limitPerDay", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerDay
-        {
-            get
-            {
-                return (long)this["limitPerDay"];
-            }
-        }
+        public long LimitPerDay => (long) this["limitPerDay"];
 
         [ConfigurationProperty("limitPerWeek", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerWeek
-        {
-            get
-            {
-                return (long)this["limitPerWeek"];
-            }
-        }
+        public long LimitPerWeek => (long) this["limitPerWeek"];
 
         [ConfigurationProperty("entry", IsRequired = true)]
-        public string Entry
-        {
-            get
-            {
-                return this["entry"] as string;
-            }
-        }
+        public string Entry => this["entry"] as string;
 
         [ConfigurationProperty("policyType", IsRequired = true)]
-        public int PolicyType
-        {
-            get
-            {
-                return (int)this["policyType"];
-            }
-        }
+        public int PolicyType => (int) this["policyType"];
     }
 }

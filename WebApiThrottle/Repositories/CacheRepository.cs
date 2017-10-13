@@ -1,38 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
+using WebApiThrottle.Models;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Repositories
 {
     /// <summary>
-    /// Stores throttle metrics in asp.net cache
+    ///     Stores throttle metrics in asp.net cache
     /// </summary>
     public class CacheRepository : IThrottleRepository
     {
         /// <summary>
-        /// Insert or update
+        ///     Insert or update
         /// </summary>
         /// <param name="id">
-        /// The id.
+        ///     The id.
         /// </param>
         /// <param name="throttleCounter">
-        /// The throttle Counter.
+        ///     The throttle Counter.
         /// </param>
         /// <param name="expirationTime">
-        /// The expiration Time.
+        ///     The expiration Time.
         /// </param>
         public void Save(string id, ThrottleCounter throttleCounter, TimeSpan expirationTime)
         {
             if (HttpContext.Current.Cache[id] != null)
-            {
                 HttpContext.Current.Cache[id] = throttleCounter;
-            }
             else
-            {
                 HttpContext.Current.Cache.Add(
                     id,
                     throttleCounter,
@@ -41,7 +35,6 @@ namespace WebApiThrottle
                     expirationTime,
                     CacheItemPriority.Low,
                     null);
-            }
         }
 
         public bool Any(string id)
@@ -51,7 +44,7 @@ namespace WebApiThrottle
 
         public ThrottleCounter? FirstOrDefault(string id)
         {
-            return (ThrottleCounter?)HttpContext.Current.Cache[id];
+            return (ThrottleCounter?) HttpContext.Current.Cache[id];
         }
 
         public void Remove(string id)
@@ -63,12 +56,8 @@ namespace WebApiThrottle
         {
             var cacheEnumerator = HttpContext.Current.Cache.GetEnumerator();
             while (cacheEnumerator.MoveNext())
-            {
                 if (cacheEnumerator.Value is ThrottleCounter)
-                {
                     HttpContext.Current.Cache.Remove(cacheEnumerator.Key.ToString());
-                }
-            }
         }
     }
 }

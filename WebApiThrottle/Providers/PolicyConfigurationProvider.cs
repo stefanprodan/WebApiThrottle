@@ -1,34 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using WebApiThrottle.Configuration;
+using WebApiThrottle.Models;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Providers
 {
     public class PolicyConfigurationProvider : IThrottlePolicyProvider
     {
-        private readonly ThrottlePolicyConfiguration policyConfig;
+        private readonly ThrottlePolicyConfiguration _policyConfig;
 
         public PolicyConfigurationProvider()
         {
-            this.policyConfig = ConfigurationManager.GetSection("throttlePolicy") as ThrottlePolicyConfiguration;
+            _policyConfig = ConfigurationManager.GetSection("throttlePolicy") as ThrottlePolicyConfiguration;
         }
 
         public ThrottlePolicySettings ReadSettings()
         {
-            var settings = new ThrottlePolicySettings()
+            var settings = new ThrottlePolicySettings
             {
-                IpThrottling = policyConfig.IpThrottling,
-                ClientThrottling = policyConfig.ClientThrottling,
-                EndpointThrottling = policyConfig.EndpointThrottling,
-                StackBlockedRequests = policyConfig.StackBlockedRequests,
-                LimitPerSecond = policyConfig.LimitPerSecond,
-                LimitPerMinute = policyConfig.LimitPerMinute,
-                LimitPerHour = policyConfig.LimitPerHour,
-                LimitPerDay = policyConfig.LimitPerDay,
-                LimitPerWeek = policyConfig.LimitPerWeek
+                IpThrottling = _policyConfig.IpThrottling,
+                ClientThrottling = _policyConfig.ClientThrottling,
+                EndpointThrottling = _policyConfig.EndpointThrottling,
+                StackBlockedRequests = _policyConfig.StackBlockedRequests,
+                LimitPerSecond = _policyConfig.LimitPerSecond,
+                LimitPerMinute = _policyConfig.LimitPerMinute,
+                LimitPerHour = _policyConfig.LimitPerHour,
+                LimitPerDay = _policyConfig.LimitPerDay,
+                LimitPerWeek = _policyConfig.LimitPerWeek
             };
 
             return settings;
@@ -37,39 +35,31 @@ namespace WebApiThrottle
         public IEnumerable<ThrottlePolicyRule> AllRules()
         {
             var rules = new List<ThrottlePolicyRule>();
-            if (policyConfig.Rules != null)
-            {
-                foreach (ThrottlePolicyRuleConfigurationElement rule in policyConfig.Rules)
-                {
+            if (_policyConfig.Rules != null)
+                foreach (ThrottlePolicyRuleConfigurationElement rule in _policyConfig.Rules)
                     rules.Add(new ThrottlePolicyRule
                     {
                         Entry = rule.Entry,
-                        PolicyType = (ThrottlePolicyType)rule.PolicyType,
+                        PolicyType = (ThrottlePolicyType) rule.PolicyType,
                         LimitPerSecond = rule.LimitPerSecond,
                         LimitPerMinute = rule.LimitPerMinute,
                         LimitPerHour = rule.LimitPerHour,
                         LimitPerDay = rule.LimitPerDay,
                         LimitPerWeek = rule.LimitPerWeek
                     });
-                }
-            }
             return rules;
         }
 
         public IEnumerable<ThrottlePolicyWhitelist> AllWhitelists()
         {
             var whitelists = new List<ThrottlePolicyWhitelist>();
-            if (policyConfig.Whitelists != null)
-            {
-                foreach (ThrottlePolicyWhitelistConfigurationElement whitelist in policyConfig.Whitelists)
-                {
+            if (_policyConfig.Whitelists != null)
+                foreach (ThrottlePolicyWhitelistConfigurationElement whitelist in _policyConfig.Whitelists)
                     whitelists.Add(new ThrottlePolicyWhitelist
                     {
                         Entry = whitelist.Entry,
-                        PolicyType = (ThrottlePolicyType)whitelist.PolicyType,
+                        PolicyType = (ThrottlePolicyType) whitelist.PolicyType
                     });
-                }
-            }
 
             return whitelists;
         }

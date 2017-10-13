@@ -1,116 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Configuration
 {
     public class ThrottlePolicyConfiguration : ConfigurationSection
     {
         [ConfigurationProperty("limitPerSecond", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerSecond
-        {
-            get
-            {
-                return (long)this["limitPerSecond"];
-            }
-        }
+        public long LimitPerSecond => (long) this["limitPerSecond"];
 
         [ConfigurationProperty("limitPerMinute", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerMinute
-        {
-            get
-            {
-                return (long)this["limitPerMinute"];
-            }
-        }
+        public long LimitPerMinute => (long) this["limitPerMinute"];
 
         [ConfigurationProperty("limitPerHour", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerHour
-        {
-            get
-            {
-                return (long)this["limitPerHour"];
-            }
-        }
+        public long LimitPerHour => (long) this["limitPerHour"];
 
         [ConfigurationProperty("limitPerDay", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerDay
-        {
-            get
-            {
-                return (long)this["limitPerDay"];
-            }
-        }
+        public long LimitPerDay => (long) this["limitPerDay"];
 
         [ConfigurationProperty("limitPerWeek", DefaultValue = "0", IsRequired = false)]
         [LongValidator(ExcludeRange = false, MinValue = 0)]
-        public long LimitPerWeek
-        {
-            get
-            {
-                return (long)this["limitPerWeek"];
-            }
-        }
+        public long LimitPerWeek => (long) this["limitPerWeek"];
 
         [ConfigurationProperty("ipThrottling", DefaultValue = "false", IsRequired = false)]
-        public bool IpThrottling
-        {
-            get
-            {
-                return (bool)this["ipThrottling"];
-            }
-        }
+        public bool IpThrottling => (bool) this["ipThrottling"];
 
         [ConfigurationProperty("clientThrottling", DefaultValue = "false", IsRequired = false)]
-        public bool ClientThrottling
-        {
-            get
-            {
-                return (bool)this["clientThrottling"];
-            }
-        }
+        public bool ClientThrottling => (bool) this["clientThrottling"];
 
         [ConfigurationProperty("endpointThrottling", DefaultValue = "false", IsRequired = false)]
-        public bool EndpointThrottling
-        {
-            get
-            {
-                return (bool)this["endpointThrottling"];
-            }
-        }
+        public bool EndpointThrottling => (bool) this["endpointThrottling"];
 
         [ConfigurationProperty("stackBlockedRequests", DefaultValue = "false", IsRequired = false)]
-        public bool StackBlockedRequests
-        {
-            get
-            {
-                return (bool)this["stackBlockedRequests"];
-            }
-        }
+        public bool StackBlockedRequests => (bool) this["stackBlockedRequests"];
 
         [ConfigurationProperty("rules")]
-        public ThrottlePolicyRuleConfigurationCollection Rules
-        {
-            get
-            {
-                return this["rules"] as ThrottlePolicyRuleConfigurationCollection;
-            }
-        }
+        public ThrottlePolicyRuleConfigurationCollection Rules =>
+            this["rules"] as ThrottlePolicyRuleConfigurationCollection;
 
         [ConfigurationProperty("whitelists")]
-        public ThrottlePolicyWhitelistConfigurationCollection Whitelists
-        {
-            get
-            {
-                return this["whitelists"] as ThrottlePolicyWhitelistConfigurationCollection;
-            }
-        }
+        public ThrottlePolicyWhitelistConfigurationCollection Whitelists =>
+            this["whitelists"] as ThrottlePolicyWhitelistConfigurationCollection;
     }
 }

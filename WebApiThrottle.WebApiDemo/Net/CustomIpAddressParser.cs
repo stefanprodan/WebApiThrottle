@@ -17,12 +17,8 @@ namespace WebApiThrottle.WebApiDemo.Net
                 IEnumerable<string> headerValues;
 
                 if (request.Headers.TryGetValues(customHeaderName, out headerValues))
-                {
                     if (headerValues.Any())
-                    {
                         return ParseIp(headerValues.FirstOrDefault().Trim());
-                    }
-                }
             }
 
             return base.GetClientIp(request);
