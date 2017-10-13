@@ -100,13 +100,10 @@ namespace WebApiThrottle
                 if (Policy.ClientWhitelist != null && Policy.ClientWhitelist.Contains(requestIdentity.ClientKey))
                     return true;
 
-            if (Policy.EndpointThrottling)
-                if (Policy.EndpointWhitelist != null
-                    && Policy.EndpointWhitelist.Any(
-                        x => requestIdentity.Endpoint.IndexOf(x, 0, StringComparison.InvariantCultureIgnoreCase) != -1))
-                    return true;
-
-            return false;
+            if (!Policy.EndpointThrottling) return false;
+            return Policy.EndpointWhitelist != null
+                   && Policy.EndpointWhitelist.Any(
+                       x => requestIdentity.Endpoint.IndexOf(x, 0, StringComparison.InvariantCultureIgnoreCase) != -1);
         }
 
         internal string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)
@@ -133,9 +130,7 @@ namespace WebApiThrottle
             byte[] hashBytes;
 
             using (var algorithm = HashAlgorithm.Create("SHA1"))
-            {
                 hashBytes = algorithm.ComputeHash(idBytes);
-            }
 
             var hex = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
             return hex;

@@ -16,7 +16,7 @@ namespace WebApiThrottle
     /// </summary>
     public class ThrottlingHandler : DelegatingHandler
     {
-        private readonly ThrottlingCore core;
+        private readonly ThrottlingCore _core;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ThrottlingHandler" /> class.
@@ -27,7 +27,7 @@ namespace WebApiThrottle
         {
             QuotaExceededResponseCode = (HttpStatusCode) 429;
             Repository = new CacheRepository();
-            core = new ThrottlingCore();
+            _core = new ThrottlingCore();
         }
 
         /// <summary>
@@ -56,21 +56,19 @@ namespace WebApiThrottle
             IThrottleLogger logger,
             IIpAddressParser ipAddressParser = null)
         {
-            core = new ThrottlingCore();
-            core.Repository = repository;
+            _core = new ThrottlingCore {Repository = repository};
             Repository = repository;
             Logger = logger;
 
             if (ipAddressParser != null)
-                core.IpAddressParser = ipAddressParser;
+                _core.IpAddressParser = ipAddressParser;
 
             QuotaExceededResponseCode = (HttpStatusCode) 429;
 
             Policy = policy;
             PolicyRepository = policyRepository;
 
-            if (policyRepository != null)
-                policyRepository.Save(ThrottleManager.GetPolicyKey(), policy);
+            policyRepository?.Save(ThrottleManager.GetPolicyKey(), policy);
         }
 
         /// <summary>
@@ -124,18 +122,16 @@ namespace WebApiThrottle
             if (Policy == null || !Policy.IpThrottling && !Policy.ClientThrottling && !Policy.EndpointThrottling)
                 return base.SendAsync(request, cancellationToken);
 
-            core.Repository = Repository;
-            core.Policy = Policy;
+            _core.Repository = Repository;
+            _core.Policy = Policy;
 
             var identity = SetIdentity(request);
 
-            if (core.IsWhitelisted(identity))
+            if (_core.IsWhitelisted(identity))
                 return base.SendAsync(request, cancellationToken);
 
-            var timeSpan = TimeSpan.FromSeconds(1);
-
             // get default rates
-            var defRates = core.RatesWithDefaults(Policy.Rates.ToList());
+            var defRates = _core.RatesWithDefaults(Policy.Rates.ToList());
             if (Policy.StackBlockedRequests)
                 defRates.Reverse();
 
@@ -145,45 +141,40 @@ namespace WebApiThrottle
                 var rateLimitPeriod = rate.Key;
                 var rateLimit = rate.Value;
 
-                timeSpan = core.GetTimeSpanFromPeriod(rateLimitPeriod);
+                var timeSpan = _core.GetTimeSpanFromPeriod(rateLimitPeriod);
 
                 // apply global rules
-                core.ApplyRules(identity, timeSpan, rateLimitPeriod, ref rateLimit);
+                _core.ApplyRules(identity, timeSpan, rateLimitPeriod, ref rateLimit);
 
-                if (rateLimit > 0)
-                {
-                    // increment counter
-                    var requestId = ComputeThrottleKey(identity, rateLimitPeriod);
-                    var throttleCounter = core.ProcessRequest(timeSpan, requestId);
+                if (rateLimit <= 0) continue;
+                // increment counter
+                var requestId = ComputeThrottleKey(identity, rateLimitPeriod);
+                var throttleCounter = _core.ProcessRequest(timeSpan, requestId);
 
-                    // check if key expired
-                    if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
-                        continue;
+                // check if key expired
+                if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
+                    continue;
 
-                    // check if limit is reached
-                    if (throttleCounter.TotalRequests > rateLimit)
-                    {
-                        // log blocked request
-                        if (Logger != null)
-                            Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter,
-                                rateLimitPeriod.ToString(), rateLimit, request));
+                // check if limit is reached
+                if (throttleCounter.TotalRequests <= rateLimit) continue;
+                // log blocked request
+                Logger?.Log(_core.ComputeLogEntry(requestId, identity, throttleCounter,
+                    rateLimitPeriod.ToString(), rateLimit, request));
 
-                        var message = !string.IsNullOrEmpty(QuotaExceededMessage)
-                            ? QuotaExceededMessage
-                            : "API calls quota exceeded! maximum admitted {0} per {1}.";
+                var message = !string.IsNullOrEmpty(QuotaExceededMessage)
+                    ? QuotaExceededMessage
+                    : "API calls quota exceeded! maximum admitted {0} per {1}.";
 
-                        var content = QuotaExceededContent != null
-                            ? QuotaExceededContent(rateLimit, rateLimitPeriod)
-                            : string.Format(message, rateLimit, rateLimitPeriod);
+                var content = QuotaExceededContent != null
+                    ? QuotaExceededContent(rateLimit, rateLimitPeriod)
+                    : string.Format(message, rateLimit, rateLimitPeriod);
 
-                        // break execution
-                        return QuotaExceededResponse(
-                            request,
-                            content,
-                            QuotaExceededResponseCode,
-                            core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
-                    }
-                }
+                // break execution
+                return QuotaExceededResponse(
+                    request,
+                    content,
+                    QuotaExceededResponseCode,
+                    _core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod));
             }
 
             // no throttling required
@@ -192,24 +183,26 @@ namespace WebApiThrottle
 
         protected IPAddress GetClientIp(HttpRequestMessage request)
         {
-            return core.GetClientIp(request);
+            return _core.GetClientIp(request);
         }
 
         protected virtual RequestIdentity SetIdentity(HttpRequestMessage request)
         {
-            var entry = new RequestIdentity();
-            entry.ClientIp = core.GetClientIp(request).ToString();
-            entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
-            entry.ClientKey = request.Headers.Contains("Authorization-Token")
-                ? request.Headers.GetValues("Authorization-Token").First()
-                : "anon";
+            var entry = new RequestIdentity
+            {
+                ClientIp = _core.GetClientIp(request).ToString(),
+                Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant(),
+                ClientKey = request.Headers.Contains("Authorization-Token")
+                    ? request.Headers.GetValues("Authorization-Token").First()
+                    : "anon"
+            };
 
             return entry;
         }
 
         protected virtual string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)
         {
-            return core.ComputeThrottleKey(requestIdentity, period);
+            return _core.ComputeThrottleKey(requestIdentity, period);
         }
 
         protected virtual Task<HttpResponseMessage> QuotaExceededResponse(HttpRequestMessage request, object content,
