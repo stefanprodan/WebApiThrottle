@@ -58,8 +58,10 @@ namespace WebApiThrottle
             IThrottleLogger logger,
             IIpAddressParser ipAddressParser = null)
         {
-            _core = new ThrottlingCore();
-            _core.Repository = repository;
+            _core = new ThrottlingCore
+            {
+                Repository = repository
+            };
             Repository = repository;
             Logger = logger;
             if (ipAddressParser != null)
@@ -70,8 +72,7 @@ namespace WebApiThrottle
             Policy = policy;
             PolicyRepository = policyRepository;
 
-            if (policyRepository != null)
-                policyRepository.Save(ThrottleManager.GetPolicyKey(), policy);
+            policyRepository?.Save(ThrottleManager.GetPolicyKey(), policy);
         }
 
         /// <summary>

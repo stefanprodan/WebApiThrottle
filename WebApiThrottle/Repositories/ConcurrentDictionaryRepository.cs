@@ -29,9 +29,7 @@ namespace WebApiThrottle.Repositories
         /// </returns>
         public ThrottleCounter? FirstOrDefault(string id)
         {
-            ThrottleCounterWrapper entry;
-
-            if (!cache.TryGetValue(id, out entry))
+            if (!cache.TryGetValue(id, out var entry))
                 return new ThrottleCounter
                 {
                     Timestamp = entry.Timestamp,

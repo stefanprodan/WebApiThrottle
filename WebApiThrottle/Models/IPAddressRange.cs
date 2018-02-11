@@ -83,12 +83,12 @@ namespace WebApiThrottle.Models
             var names = new List<string>();
             foreach (var item in info) names.Add(item.Name);
 
-            Func<string, IPAddress> deserialize = name => names.Contains(name)
+            IPAddress Deserialize(string name) => names.Contains(name)
                 ? IPAddress.Parse(info.GetValue(name, typeof(object)).ToString())
                 : new IPAddress(0L);
 
-            Begin = deserialize("Begin");
-            End = deserialize("End");
+            Begin = Deserialize("Begin");
+            End = Deserialize("End");
         }
 
         public IPAddress Begin { get; set; }

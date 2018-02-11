@@ -55,8 +55,10 @@ namespace WebApiThrottle
             IIpAddressParser ipAddressParser)
             : base(next)
         {
-            core = new ThrottlingCore();
-            core.Repository = repository;
+            core = new ThrottlingCore
+            {
+                Repository = repository
+            };
             Repository = repository;
             Logger = logger;
 
@@ -193,12 +195,14 @@ namespace WebApiThrottle
 
         protected virtual RequestIdentity SetIdentity(IOwinRequest request)
         {
-            var entry = new RequestIdentity();
-            entry.ClientIp = request.RemoteIpAddress;
-            entry.Endpoint = request.Uri.AbsolutePath.ToLowerInvariant();
-            entry.ClientKey = request.Headers.Keys.Contains("Authorization-Token")
-                ? request.Headers.GetValues("Authorization-Token").First()
-                : "anon";
+            var entry = new RequestIdentity
+            {
+                ClientIp = request.RemoteIpAddress,
+                Endpoint = request.Uri.AbsolutePath.ToLowerInvariant(),
+                ClientKey = request.Headers.Keys.Contains("Authorization-Token")
+                    ? request.Headers.GetValues("Authorization-Token").First()
+                    : "anon"
+            };
 
             return entry;
         }
