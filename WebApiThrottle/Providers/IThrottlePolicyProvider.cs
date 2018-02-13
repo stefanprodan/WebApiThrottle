@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using WebApiThrottle.Models;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Providers
 {
     /// <summary>
-    /// Implement this interface if you want to load the policy rules from a persistent store
+    ///     Implement this interface if you want to load the policy rules from a persistent store
     /// </summary>
     public interface IThrottlePolicyProvider
     {

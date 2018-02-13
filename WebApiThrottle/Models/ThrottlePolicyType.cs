@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WebApiThrottle
+﻿namespace WebApiThrottle.Models
 {
-    public enum ThrottlePolicyType : int
+    public enum ThrottlePolicyType
     {
         IpThrottling = 1,
         ClientThrottling,

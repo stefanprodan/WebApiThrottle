@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Http.Filters;
+﻿using System.Web.Http.Filters;
+using WebApiThrottle.Models;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Attributes
 {
     public class EnableThrottlingAttribute : ActionFilterAttribute, IActionFilter
     {

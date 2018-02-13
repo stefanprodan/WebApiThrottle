@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Configuration
 {
-    public class ThrottlePolicyRuleConfigurationCollection : ConfigurationElementCollection
+    public abstract class ThrottlePolicyRuleConfigurationCollection : ConfigurationElementCollection
     {
-
         protected override ConfigurationElement CreateNewElement()
         {
             return new ThrottlePolicyRuleConfigurationElement();
@@ -17,7 +11,7 @@ namespace WebApiThrottle
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((ThrottlePolicyRuleConfigurationElement)element).Entry;
+            return ((ThrottlePolicyRuleConfigurationElement) element).Entry;
         }
     }
 }

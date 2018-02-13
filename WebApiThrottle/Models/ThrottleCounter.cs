@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Models
 {
     /// <summary>
-    /// Stores the initial access time and the numbers of calls made from that point
+    ///     Stores the initial access time and the numbers of calls made from that point
     /// </summary>
     [Serializable]
     public struct ThrottleCounter

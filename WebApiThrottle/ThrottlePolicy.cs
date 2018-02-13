@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using WebApiThrottle.Models;
+using WebApiThrottle.Providers;
 
 namespace WebApiThrottle
 {
     /// <summary>
-    /// Rate limits policy
+    ///     Rate limits policy
     /// </summary>
     [Serializable]
     public class ThrottlePolicy
@@ -24,41 +24,32 @@ namespace WebApiThrottle
         }
 
         /// <summary>
-        /// Configure default request limits per second, minute, hour or day
+        ///     Configure default request limits per second, minute, hour or day
         /// </summary>
-        public ThrottlePolicy(long? perSecond = null, long? perMinute = null, long? perHour = null, long? perDay = null, long? perWeek = null)
+        public ThrottlePolicy(long? perSecond = null, long? perMinute = null, long? perHour = null, long? perDay = null,
+            long? perWeek = null)
             : this()
         {
             Rates = new Dictionary<RateLimitPeriod, long>();
             if (perSecond.HasValue)
-            {
                 Rates.Add(RateLimitPeriod.Second, perSecond.Value);
-            }
 
             if (perMinute.HasValue)
-            {
                 Rates.Add(RateLimitPeriod.Minute, perMinute.Value);
-            }
 
 
             if (perHour.HasValue)
-            {
                 Rates.Add(RateLimitPeriod.Hour, perHour.Value);
-            }
 
 
             if (perDay.HasValue)
-            {
                 Rates.Add(RateLimitPeriod.Day, perDay.Value);
-            }
             if (perWeek.HasValue)
-            {
                 Rates.Add(RateLimitPeriod.Week, perWeek.Value);
-            }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether IP throttling is enabled.
+        ///     Gets or sets a value indicating whether IP throttling is enabled.
         /// </summary>
         public bool IpThrottling { get; set; }
 
@@ -67,7 +58,7 @@ namespace WebApiThrottle
         public IDictionary<string, RateLimits> IpRules { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether client key throttling is enabled.
+        ///     Gets or sets a value indicating whether client key throttling is enabled.
         /// </summary>
         public bool ClientThrottling { get; set; }
 
@@ -76,7 +67,7 @@ namespace WebApiThrottle
         public IDictionary<string, RateLimits> ClientRules { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether route throttling is enabled
+        ///     Gets or sets a value indicating whether route throttling is enabled
         /// </summary>
         public bool EndpointThrottling { get; set; }
 
@@ -85,7 +76,8 @@ namespace WebApiThrottle
         public IDictionary<string, RateLimits> EndpointRules { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether all requests, including the rejected ones, should be stacked in this order: day, hour, min, sec
+        ///     Gets or sets a value indicating whether all requests, including the rejected ones, should be stacked in this order:
+        ///     day, hour, min, sec
         /// </summary>
         public bool StackBlockedRequests { get; set; }
 
@@ -98,34 +90,34 @@ namespace WebApiThrottle
             var rules = provider.AllRules();
 
             var policy = new ThrottlePolicy(
-                perSecond: settings.LimitPerSecond,
-               perMinute: settings.LimitPerMinute,
-               perHour: settings.LimitPerHour,
-               perDay: settings.LimitPerDay,
-               perWeek: settings.LimitPerWeek);
-
-            policy.IpThrottling = settings.IpThrottling;
-            policy.ClientThrottling = settings.ClientThrottling;
-            policy.EndpointThrottling = settings.EndpointThrottling;
-            policy.StackBlockedRequests = settings.StackBlockedRequests;
-
-            policy.IpRules = new Dictionary<string, RateLimits>();
-            policy.ClientRules = new Dictionary<string, RateLimits>();
-            policy.EndpointRules = new Dictionary<string, RateLimits>();
-            policy.EndpointWhitelist = new List<string>();
-            policy.IpWhitelist = new List<string>();
-            policy.ClientWhitelist = new List<string>();
+                settings.LimitPerSecond,
+                settings.LimitPerMinute,
+                settings.LimitPerHour,
+                settings.LimitPerDay,
+                settings.LimitPerWeek)
+            {
+                IpThrottling = settings.IpThrottling,
+                ClientThrottling = settings.ClientThrottling,
+                EndpointThrottling = settings.EndpointThrottling,
+                StackBlockedRequests = settings.StackBlockedRequests,
+                IpRules = new Dictionary<string, RateLimits>(),
+                ClientRules = new Dictionary<string, RateLimits>(),
+                EndpointRules = new Dictionary<string, RateLimits>(),
+                EndpointWhitelist = new List<string>(),
+                IpWhitelist = new List<string>(),
+                ClientWhitelist = new List<string>()
+            };
 
             foreach (var item in rules)
             {
                 var rateLimit = new RateLimits
-                                    {
-                                        PerSecond = item.LimitPerSecond,
-                                        PerMinute = item.LimitPerMinute,
-                                        PerHour = item.LimitPerHour,
-                                        PerDay = item.LimitPerDay,
-                                        PerWeek = item.LimitPerWeek
-                                    };
+                {
+                    PerSecond = item.LimitPerSecond,
+                    PerMinute = item.LimitPerMinute,
+                    PerHour = item.LimitPerHour,
+                    PerDay = item.LimitPerDay,
+                    PerWeek = item.LimitPerWeek
+                };
 
                 switch (item.PolicyType)
                 {
@@ -141,12 +133,15 @@ namespace WebApiThrottle
                 }
             }
 
-            if (whitelists != null)
-            {
-                policy.IpWhitelist.AddRange(whitelists.Where(x => x.PolicyType == ThrottlePolicyType.IpThrottling).Select(x => x.Entry));
-                policy.ClientWhitelist.AddRange(whitelists.Where(x => x.PolicyType == ThrottlePolicyType.ClientThrottling).Select(x => x.Entry));
-                policy.EndpointWhitelist.AddRange(whitelists.Where(x => x.PolicyType == ThrottlePolicyType.EndpointThrottling).Select(x => x.Entry));
-            }
+            if (whitelists == null) return policy;
+
+            policy.IpWhitelist.AddRange(whitelists.Where(x => x.PolicyType == ThrottlePolicyType.IpThrottling)
+                .Select(x => x.Entry));
+            policy.ClientWhitelist.AddRange(whitelists
+                .Where(x => x.PolicyType == ThrottlePolicyType.ClientThrottling).Select(x => x.Entry));
+            policy.EndpointWhitelist.AddRange(whitelists
+                .Where(x => x.PolicyType == ThrottlePolicyType.EndpointThrottling).Select(x => x.Entry));
+
             return policy;
         }
     }

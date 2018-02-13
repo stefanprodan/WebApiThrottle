@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using System.Collections.Generic;
 using System.Web.Http;
+using WebApiThrottle.Attributes;
+using WebApiThrottle.Models;
+using WebApiThrottle.Repositories;
 
 namespace WebApiThrottle.WebApiDemo.Controllers
 {
@@ -12,7 +11,7 @@ namespace WebApiThrottle.WebApiDemo.Controllers
         [EnableThrottling(PerSecond = 2)]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            return new[] {"value1", "value2"};
         }
 
         [DisableThrotting]
@@ -22,7 +21,7 @@ namespace WebApiThrottle.WebApiDemo.Controllers
         }
 
         /// <summary>
-        /// Policy runtime update example
+        ///     Policy runtime update example
         /// </summary>
         [NonAction]
         public void UpdateRateLimits()
@@ -35,15 +34,14 @@ namespace WebApiThrottle.WebApiDemo.Controllers
 
             //update client rate limits
             policy.ClientRules["api-client-key-1"] =
-                new RateLimits { PerMinute = 50, PerHour = 500 };
+                new RateLimits {PerMinute = 50, PerHour = 500};
 
             //add new client rate limits
             policy.ClientRules.Add("api-client-key-3",
-                new RateLimits { PerMinute = 60, PerHour = 600 });
+                new RateLimits {PerMinute = 60, PerHour = 600});
 
             //apply policy updates
             ThrottleManager.UpdatePolicy(policy, policyRepository);
-
         }
     }
 }

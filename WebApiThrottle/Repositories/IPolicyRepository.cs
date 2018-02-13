@@ -1,5 +1,4 @@
-﻿using System;
-namespace WebApiThrottle
+﻿namespace WebApiThrottle.Repositories
 {
     public interface IPolicyRepository
     {

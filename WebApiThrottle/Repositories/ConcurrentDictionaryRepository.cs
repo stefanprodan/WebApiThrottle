@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using WebApiThrottle.Models;
 
-namespace WebApiThrottle
+namespace WebApiThrottle.Repositories
 {
     /// <summary>
-    /// Stores throttle metrics in a thread safe dictionary, has no clean-up mechanism, expired counters are deleted on renewal
+    ///     Stores throttle metrics in a thread safe dictionary, has no clean-up mechanism, expired counters are deleted on
+    ///     renewal
     /// </summary>
-    public class ConcurrentDictionaryRepository : IThrottleRepository
+    public partial class ConcurrentDictionaryRepository : IThrottleRepository
     {
-        private static ConcurrentDictionary<string, ThrottleCounterWrapper> cache = new ConcurrentDictionary<string, ThrottleCounterWrapper>();
+        private static readonly ConcurrentDictionary<string, ThrottleCounterWrapper> cache =
+            new ConcurrentDictionary<string, ThrottleCounterWrapper>();
 
         public bool Any(string id)
         {
@@ -20,33 +19,30 @@ namespace WebApiThrottle
         }
 
         /// <summary>
-        /// Insert or update
+        ///     Insert or update
         /// </summary>
         /// <param name="id">
-        /// The id.
+        ///     The id.
         /// </param>
         /// <returns>
-        /// The <see cref="ThrottleCounter"/>.
+        ///     The <see cref="ThrottleCounter" />.
         /// </returns>
         public ThrottleCounter? FirstOrDefault(string id)
         {
-            var entry = new ThrottleCounterWrapper();
-
-            if (cache.TryGetValue(id, out entry))
-            {
-                // remove expired entry
-                if (entry.Timestamp + entry.ExpirationTime < DateTime.UtcNow)
+            if (!cache.TryGetValue(id, out var entry))
+                return new ThrottleCounter
                 {
-                    cache.TryRemove(id, out entry);
-                    return null;
-                }
-            }
-
-            return new ThrottleCounter
-            {
-                Timestamp = entry.Timestamp,
-                TotalRequests = entry.TotalRequests
-            };
+                    Timestamp = entry.Timestamp,
+                    TotalRequests = entry.TotalRequests
+                };
+            if (entry.Timestamp + entry.ExpirationTime >= DateTime.UtcNow)
+                return new ThrottleCounter
+                {
+                    Timestamp = entry.Timestamp,
+                    TotalRequests = entry.TotalRequests
+                };
+            cache.TryRemove(id, out entry);
+            return null;
         }
 
         public void Save(string id, ThrottleCounter throttleCounter, TimeSpan expirationTime)
@@ -63,23 +59,12 @@ namespace WebApiThrottle
 
         public void Remove(string id)
         {
-            var entry = new ThrottleCounterWrapper();
-            cache.TryRemove(id, out entry);
+            cache.TryRemove(id, out ThrottleCounterWrapper entry);
         }
 
         public void Clear()
         {
             cache.Clear();
-        }
-
-        [Serializable]
-        internal struct ThrottleCounterWrapper
-        {
-            public DateTime Timestamp { get; set; }
-
-            public long TotalRequests { get; set; }
-
-            public TimeSpan ExpirationTime { get; set; }
         }
     }
 }
