@@ -145,7 +145,7 @@ namespace WebApiThrottle
 
             byte[] hashBytes;
 
-            using (var algorithm = System.Security.Cryptography.HashAlgorithm.Create("SHA1"))
+            using (var algorithm = System.Security.Cryptography.SHA1.Create())
             {
                 hashBytes = algorithm.ComputeHash(idBytes);
             }
