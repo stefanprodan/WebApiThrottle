@@ -98,7 +98,7 @@ namespace WebApiThrottle
 
             if (Policy.ClientThrottling)
             {
-                if (Policy.ClientWhitelist != null && Policy.ClientWhitelist.Contains(requestIdentity.ClientKey))
+                if (Policy.ClientWhitelist != null && Policy.ClientWhitelist.Contains(requestIdentity.ClientKey, Policy.StringComparerForClients))
                 {
                     return true;
                 }
