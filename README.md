@@ -548,3 +548,19 @@ config.MessageHandlers.Add(new ThrottlingHandler(
     logger: new TracingThrottleLogger(traceWriter),
     ipAddressParser: new CustomIpAddressParser()));
 ```
+
+### Custom Quota Exceeded Reponse
+
+If you want to customize the quota exceeded response you can set the properties <code>QuotaExceededResponseCode</code> and <code>QuotaExceededMessage</code>.
+
+``` cs
+config.MessageHandlers.Add(new ThrottlingHandler(
+    policy: new ThrottlePolicy(perMinute: 20, perHour: 30, perDay: 35, perWeek: 3000)
+    {        
+        IpThrottling = true,
+        ///...
+    },
+    repository: new CacheRepository(),
+    QuotaExceededResponseCode = HttpStatusCode.ServiceUnavailable,
+    QuotaExceededMessage = "Too many calls! We can only allow {0} per {1}"));
+```
