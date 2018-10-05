@@ -549,7 +549,7 @@ config.MessageHandlers.Add(new ThrottlingHandler(
     ipAddressParser: new CustomIpAddressParser()));
 ```
 
-### Custom Quota Exceeded Reponse
+### Custom Quota Exceeded Response
 
 If you want to customize the quota exceeded response you can set the properties <code>QuotaExceededResponseCode</code> and <code>QuotaExceededMessage</code>.
 
