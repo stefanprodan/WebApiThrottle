@@ -142,6 +142,8 @@ namespace WebApiThrottle
 
                 sw.Write(period);
 
+                sw.Flush();
+
                 ms.Position = 0;
                 using (var algorithm = new SHA1Managed())
                 {
