@@ -19,7 +19,7 @@ namespace WebApiThrottle
 
         public long PerWeek { get; set; }
 
-        public long GetLimit(RateLimitPeriod period)
+        public virtual long GetLimit(RateLimitPeriod period)
         {
             switch (period)
             {
