@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace WebApiThrottle
 {
+    using Models;
+
     /// <summary>
     /// Rate limits policy
     /// </summary>
@@ -79,6 +81,8 @@ namespace WebApiThrottle
         /// Gets or sets a value indicating whether route throttling is enabled
         /// </summary>
         public bool EndpointThrottling { get; set; }
+
+        public EndpointThrottlingMethod EndpointThrottleMethod { get; set; }
 
         public List<string> EndpointWhitelist { get; set; }
 

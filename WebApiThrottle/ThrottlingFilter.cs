@@ -228,6 +228,14 @@ namespace WebApiThrottle
             entry.ClientIp = core.GetClientIp(request).ToString();
             entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
             entry.ClientKey = request.Headers.Contains("Authorization-Token") ? request.Headers.GetValues("Authorization-Token").First() : "anon";
+            
+            var actionDescriptor = request.GetActionDescriptor();
+            if (actionDescriptor == null)
+                return entry;
+
+            entry.ActionName = actionDescriptor.ActionName;
+            if(actionDescriptor.ControllerDescriptor != null)
+                entry.ControllerName = actionDescriptor.ControllerDescriptor.ControllerName;
 
             return entry;
         }

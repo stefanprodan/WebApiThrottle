@@ -8,6 +8,8 @@ using WebApiThrottle.Net;
 
 namespace WebApiThrottle
 {
+    using Models;
+
     /// <summary>
     /// Common code shared between ThrottlingHandler and ThrottlingFilter
     /// </summary>
@@ -135,7 +137,17 @@ namespace WebApiThrottle
 
             if (Policy.EndpointThrottling)
             {
-                keyValues.Add(requestIdentity.Endpoint);
+                if (Policy.EndpointThrottleMethod == EndpointThrottlingMethod.Action &&
+                    !string.IsNullOrWhiteSpace(requestIdentity.ActionName) &&
+                    !string.IsNullOrWhiteSpace(requestIdentity.ControllerName))
+                {
+                    //TODO: think of a better way to do this
+                    keyValues.Add(requestIdentity.ControllerName + "." + requestIdentity.ActionName);
+                }
+                else if (Policy.EndpointThrottleMethod == EndpointThrottlingMethod.Url)
+                {
+                    keyValues.Add(requestIdentity.Endpoint);
+                }
             }
 
             keyValues.Add(period.ToString());

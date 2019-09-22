@@ -18,6 +18,10 @@ namespace WebApiThrottle
 
         public string Endpoint { get; set; }
 
+        public string ActionName { get; set; }
+
+        public string ControllerName { get; set; }
+
         public bool ForceWhiteList { get; set; }
     }
 }
