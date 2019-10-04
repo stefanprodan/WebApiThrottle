@@ -196,13 +196,10 @@ namespace WebApiThrottle
                             : "API calls quota exceeded! maximum admitted {0} per {1}.";
 
                         // break execution
-                        response.OnSendingHeaders(state =>
-                        {
-                            var resp = (OwinResponse)state;
-                            resp.Headers.Add("Retry-After", new string[] { core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod) });
-                            resp.StatusCode = (int)QuotaExceededResponseCode;
-                            resp.ReasonPhrase = string.Format(message, rateLimit, rateLimitPeriod);
-                        }, response);
+                        response.StatusCode = (int)QuotaExceededResponseCode;
+                        response.ReasonPhrase = string.Format(message, rateLimit, rateLimitPeriod);
+
+                        response.Headers.Add("Retry-After", new[] { core.RetryAfterFrom(throttleCounter.Timestamp, rateLimitPeriod) });
 
                         return;
                     }
