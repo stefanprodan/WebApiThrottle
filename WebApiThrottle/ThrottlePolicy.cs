@@ -21,6 +21,7 @@ namespace WebApiThrottle
             EndpointWhitelist = new List<string>();
             EndpointRules = new Dictionary<string, RateLimits>();
             Rates = new Dictionary<RateLimitPeriod, long>();
+            StringComparerForClients = StringComparer.CurrentCulture;
         }
 
         /// <summary>
@@ -90,6 +91,7 @@ namespace WebApiThrottle
         public bool StackBlockedRequests { get; set; }
 
         public Dictionary<RateLimitPeriod, long> Rates { get; set; }
+        public IEqualityComparer<string> StringComparerForClients { get; set; }
 
         public static ThrottlePolicy FromStore(IThrottlePolicyProvider provider)
         {
