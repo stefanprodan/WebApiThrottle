@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using WebApiThrottle.Net;
 
@@ -118,40 +120,37 @@ namespace WebApiThrottle
 
         internal string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)
         {
-            var keyValues = new List<string>()
+            using (var ms = new MemoryStream())
+            using (var sw = new StreamWriter(ms, Encoding.UTF8))
+            {
+                sw.Write(ThrottleManager.GetThrottleKey());
+
+                if (Policy.IpThrottling)
                 {
-                    ThrottleManager.GetThrottleKey()
-                };
+                    sw.Write(requestIdentity.ClientIp);
+                }
 
-            if (Policy.IpThrottling)
-            {
-                keyValues.Add(requestIdentity.ClientIp);
+                if (Policy.ClientThrottling)
+                {
+                    sw.Write(requestIdentity.ClientKey);
+                }
+
+                if (Policy.EndpointThrottling)
+                {
+                    sw.Write(requestIdentity.Endpoint);
+                }
+
+                sw.Write(period);
+
+                sw.Flush();
+
+                ms.Position = 0;
+                using (var algorithm = new SHA1Managed())
+                {
+                    var hash = algorithm.ComputeHash(ms);
+                    return Convert.ToBase64String(hash);
+                }
             }
-
-            if (Policy.ClientThrottling)
-            {
-                keyValues.Add(requestIdentity.ClientKey);
-            }
-
-            if (Policy.EndpointThrottling)
-            {
-                keyValues.Add(requestIdentity.Endpoint);
-            }
-
-            keyValues.Add(period.ToString());
-
-            var id = string.Join("_", keyValues);
-            var idBytes = Encoding.UTF8.GetBytes(id);
-
-            byte[] hashBytes;
-
-            using (var algorithm = System.Security.Cryptography.SHA1.Create())
-            {
-                hashBytes = algorithm.ComputeHash(idBytes);
-            }
-            
-            var hex = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
-            return hex;
         }
 
         internal List<KeyValuePair<RateLimitPeriod, long>> RatesWithDefaults(List<KeyValuePair<RateLimitPeriod, long>> defRates)
