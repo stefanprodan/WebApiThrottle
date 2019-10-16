@@ -129,7 +129,7 @@ namespace WebApiThrottle
         /// </summary>
         public HttpStatusCode QuotaExceededResponseCode { get; set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // get policy from repo
             if (policyRepository != null)
@@ -139,17 +139,17 @@ namespace WebApiThrottle
 
             if (policy == null || (!policy.IpThrottling && !policy.ClientThrottling && !policy.EndpointThrottling))
             {
-                return base.SendAsync(request, cancellationToken);
+                return await base.SendAsync(request, cancellationToken);
             }
 
             core.Repository = Repository;
             core.Policy = policy;
 
-            var identity = SetIdentity(request);
+            var identity = await SetIdentityAsync(request);
 
             if (core.IsWhitelisted(identity))
             {
-                return base.SendAsync(request, cancellationToken);
+                return await base.SendAsync(request, cancellationToken);
             }
 
             TimeSpan timeSpan = TimeSpan.FromSeconds(1);
@@ -204,7 +204,7 @@ namespace WebApiThrottle
                             : string.Format(message, rateLimit, rateLimitPeriod);
 
                         // break execution
-                        return QuotaExceededResponse(
+                        return await QuotaExceededResponse(
                             request,
                             content,
                             QuotaExceededResponseCode,
@@ -214,7 +214,7 @@ namespace WebApiThrottle
             }
 
             // no throttling required
-            return base.SendAsync(request, cancellationToken);
+            return await base.SendAsync(request, cancellationToken);
         }
 
         protected IPAddress GetClientIp(HttpRequestMessage request)
@@ -222,7 +222,13 @@ namespace WebApiThrottle
             return core.GetClientIp(request);
         }
 
+        [Obsolete("This method is deprecated, use SetIdentityAsync instead")]
         protected virtual RequestIdentity SetIdentity(HttpRequestMessage request)
+        {
+            throw new NotImplementedException("This method is deprecated, use SetIdentityAsync instead");
+        }
+
+        protected virtual Task<RequestIdentity> SetIdentityAsync(HttpRequestMessage request)
         {
             var entry = new RequestIdentity();
             entry.ClientIp = core.GetClientIp(request).ToString();
@@ -231,7 +237,7 @@ namespace WebApiThrottle
                 ? request.Headers.GetValues("Authorization-Token").First() 
                 : "anon";
 
-            return entry;
+            return Task.FromResult(entry);
         }
 
         protected virtual string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)

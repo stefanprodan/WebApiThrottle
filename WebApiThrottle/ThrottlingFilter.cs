@@ -129,7 +129,7 @@ namespace WebApiThrottle
         /// </summary>
         public HttpStatusCode QuotaExceededResponseCode { get; set; }
 
-        public override void OnActionExecuting(HttpActionContext actionContext)
+        public override async Task OnActionExecutingAsync(HttpActionContext actionContext, System.Threading.CancellationToken cancellationToken)
         {
             EnableThrottlingAttribute attrPolicy = null;
             var applyThrottling = ApplyThrottling(actionContext, out attrPolicy);
@@ -145,7 +145,7 @@ namespace WebApiThrottle
                 core.Repository = Repository;
                 core.Policy = Policy;
 
-                var identity = SetIdentity(actionContext.Request);
+                var identity = await SetIdentityAsync(actionContext.Request);
 
                 if (!core.IsWhitelisted(identity))
                 {
@@ -219,17 +219,24 @@ namespace WebApiThrottle
                 }
             }
 
-            base.OnActionExecuting(actionContext);
+            await base.OnActionExecutingAsync(actionContext, cancellationToken);
         }
 
+
+        [Obsolete("This method is deprecated, use SetIdentityAsync instead")]
         protected virtual RequestIdentity SetIdentity(HttpRequestMessage request)
+        {
+            throw new NotImplementedException("This method is deprecated, use SetIdentityAsync instead");
+        }
+
+        protected virtual Task<RequestIdentity> SetIdentityAsync(HttpRequestMessage request)
         {
             var entry = new RequestIdentity();
             entry.ClientIp = core.GetClientIp(request).ToString();
             entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
             entry.ClientKey = request.Headers.Contains("Authorization-Token") ? request.Headers.GetValues("Authorization-Token").First() : "anon";
 
-            return entry;
+            return Task.FromResult(entry);
         }
 
         protected virtual string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)

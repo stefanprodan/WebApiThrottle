@@ -140,7 +140,7 @@ namespace WebApiThrottle
             core.Repository = Repository;
             core.Policy = policy;
 
-            var identity = SetIdentity(request);
+            var identity = await SetIdentityAsync(request);
 
             if (core.IsWhitelisted(identity))
             {
@@ -213,7 +213,13 @@ namespace WebApiThrottle
             await Next.Invoke(context);
         }
 
+        [Obsolete("This method is deprecated, use SetIdentityAsync instead")]
         protected virtual RequestIdentity SetIdentity(IOwinRequest request)
+        {
+            throw new NotImplementedException("This method is deprecated, use SetIdentityAsync instead");
+        }
+
+        protected virtual Task<RequestIdentity> SetIdentityAsync(IOwinRequest request)
         {
             var entry = new RequestIdentity();
             entry.ClientIp = request.RemoteIpAddress;
@@ -222,7 +228,7 @@ namespace WebApiThrottle
                 ? request.Headers.GetValues("Authorization-Token").First()
                 : "anon";
 
-            return entry;
+            return Task.FromResult(entry);
         }
 
         protected virtual string ComputeThrottleKey(RequestIdentity requestIdentity, RateLimitPeriod period)
