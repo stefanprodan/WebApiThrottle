@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -129,6 +129,22 @@ namespace WebApiThrottle
         /// </summary>
         public HttpStatusCode QuotaExceededResponseCode { get; set; }
 
+        private string tokenKey = "Authorization-Token";
+
+        public string AuthorizationToken
+        {
+            get { return tokenKey; }
+            set
+            {
+                if (string.IsNullOrEmpty(tokenKey))
+                {
+                    throw new ArgumentNullException(nameof(AuthorizationToken));
+                }
+
+                tokenKey = value;
+            }
+        }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // get policy from repo
@@ -227,8 +243,8 @@ namespace WebApiThrottle
             var entry = new RequestIdentity();
             entry.ClientIp = core.GetClientIp(request).ToString();
             entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
-            entry.ClientKey = request.Headers.Contains("Authorization-Token") 
-                ? request.Headers.GetValues("Authorization-Token").First() 
+            entry.ClientKey = request.Headers.Contains(AuthorizationToken) 
+                ? request.Headers.GetValues(AuthorizationToken).First() 
                 : "anon";
 
             return entry;
