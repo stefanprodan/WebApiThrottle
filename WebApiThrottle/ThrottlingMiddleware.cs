@@ -49,10 +49,10 @@ namespace WebApiThrottle
         /// <param name="ipAddressParser">
         /// The IpAddressParser
         /// </param>
-        public ThrottlingMiddleware(OwinMiddleware next, 
-            ThrottlePolicy policy, 
-            IPolicyRepository policyRepository, 
-            IThrottleRepository repository, 
+        public ThrottlingMiddleware(OwinMiddleware next,
+            ThrottlePolicy policy,
+            IPolicyRepository policyRepository,
+            IThrottleRepository repository,
             IThrottleLogger logger,
             IIpAddressParser ipAddressParser)
             : base(next)
@@ -174,7 +174,7 @@ namespace WebApiThrottle
                 {
                     // increment counter
                     var requestId = ComputeThrottleKey(identity, rateLimitPeriod);
-                    var throttleCounter = core.ProcessRequest(timeSpan, requestId);
+                    var throttleCounter = core.ProcessRequest(timeSpan, requestId, this.EffectiveIncrement);
 
                     // check if key expired
                     if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
@@ -211,6 +211,11 @@ namespace WebApiThrottle
 
             // no throttling required
             await Next.Invoke(context);
+        }
+
+        protected virtual int EffectiveIncrement
+        {
+            get { return 1; }
         }
 
         protected virtual RequestIdentity SetIdentity(IOwinRequest request)
