@@ -53,9 +53,9 @@ namespace WebApiThrottle
         /// <param name="ipAddressParser">
         /// The IpAddressParser
         /// </param>
-        public ThrottlingHandler(ThrottlePolicy policy, 
-            IPolicyRepository policyRepository, 
-            IThrottleRepository repository, 
+        public ThrottlingHandler(ThrottlePolicy policy,
+            IPolicyRepository policyRepository,
+            IThrottleRepository repository,
             IThrottleLogger logger,
             IIpAddressParser ipAddressParser = null)
         {
@@ -178,7 +178,7 @@ namespace WebApiThrottle
                 {
                     // increment counter
                     var requestId = ComputeThrottleKey(identity, rateLimitPeriod);
-                    var throttleCounter = core.ProcessRequest(timeSpan, requestId);
+                    var throttleCounter = core.ProcessRequest(timeSpan, requestId, this.EffectiveIncrement);
 
                     // check if key expired
                     if (throttleCounter.Timestamp + timeSpan < DateTime.UtcNow)
@@ -195,8 +195,8 @@ namespace WebApiThrottle
                             Logger.Log(core.ComputeLogEntry(requestId, identity, throttleCounter, rateLimitPeriod.ToString(), rateLimit, request));
                         }
 
-                        var message = !string.IsNullOrEmpty(this.QuotaExceededMessage) 
-                            ? this.QuotaExceededMessage 
+                        var message = !string.IsNullOrEmpty(this.QuotaExceededMessage)
+                            ? this.QuotaExceededMessage
                             : "API calls quota exceeded! maximum admitted {0} per {1}.";
 
                         var content = this.QuotaExceededContent != null
@@ -217,6 +217,11 @@ namespace WebApiThrottle
             return base.SendAsync(request, cancellationToken);
         }
 
+        protected virtual int EffectiveIncrement
+        {
+            get { return 1; }
+        }
+
         protected IPAddress GetClientIp(HttpRequestMessage request)
         {
             return core.GetClientIp(request);
@@ -227,8 +232,8 @@ namespace WebApiThrottle
             var entry = new RequestIdentity();
             entry.ClientIp = core.GetClientIp(request).ToString();
             entry.Endpoint = request.RequestUri.AbsolutePath.ToLowerInvariant();
-            entry.ClientKey = request.Headers.Contains("Authorization-Token") 
-                ? request.Headers.GetValues("Authorization-Token").First() 
+            entry.ClientKey = request.Headers.Contains("Authorization-Token")
+                ? request.Headers.GetValues("Authorization-Token").First()
                 : "anon";
 
             return entry;

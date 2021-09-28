@@ -184,7 +184,7 @@ namespace WebApiThrottle
             return defRates;
         }
 
-        internal ThrottleCounter ProcessRequest(TimeSpan timeSpan, string id)
+        internal ThrottleCounter ProcessRequest(TimeSpan timeSpan, string id, int effectiveInffective)
         {
             var throttleCounter = new ThrottleCounter()
             {
@@ -202,7 +202,7 @@ namespace WebApiThrottle
                     if (entry.Value.Timestamp + timeSpan >= DateTime.UtcNow)
                     {
                         // increment request count
-                        var totalRequests = entry.Value.TotalRequests + 1;
+                        var totalRequests = entry.Value.TotalRequests + effectiveInffective;
 
                         // deep copy
                         throttleCounter = new ThrottleCounter
