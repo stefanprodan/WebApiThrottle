@@ -46,6 +46,8 @@ namespace WebApiThrottle.Net
             return false;
         }
 
+        private static readonly IPAddress _defaultIPAddress = new IPAddress(new byte[] { 169, 254, 0, 0 });
+        
         public static IPAddress ParseIp(string ipAddress)
         {
             ipAddress = ipAddress.Trim();
@@ -59,7 +61,9 @@ namespace WebApiThrottle.Net
                 ipAddress = ipAddress.Substring(0, portDelimiterPos);
             }
             
-            return IPAddress.Parse(ipAddress);
+            // If IPAddress can not be parsed, we return a default Link-local address.
+            // Sometimes, X-Forwarded-For headers have non valid IP Address
+            return (IPAddress.TryParse(ipAddress, out var address) ? address : _defaultIPAddress);
         }
 
         public static bool IsPrivateIpAddress(string ipAddress)
