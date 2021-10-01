@@ -65,5 +65,13 @@ namespace WebApiThrottle.Tests
 
             Assert.Equal(false, result);
         }
+
+        [Fact]
+        public void IsPrivateIpAddress_InvalidAddress_ReturnsTrue()
+        {
+            bool result = IpAddressUtil.IsPrivateIpAddress("INVALIDIP");
+
+            Assert.True(result);
+        }
     }
 }
