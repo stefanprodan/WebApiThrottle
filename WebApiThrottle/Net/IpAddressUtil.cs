@@ -63,7 +63,8 @@ namespace WebApiThrottle.Net
             
             // If IPAddress can not be parsed, we return a default Link-local address.
             // Sometimes, X-Forwarded-For headers have non valid IP Address
-            return (IPAddress.TryParse(ipAddress, out var address) ? address : _defaultIPAddress);
+            IPAddress address;
+            return (IPAddress.TryParse(ipAddress, out address) ? address : _defaultIPAddress);
         }
 
         public static bool IsPrivateIpAddress(string ipAddress)
